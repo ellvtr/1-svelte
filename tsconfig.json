@@ -7,21 +7,12 @@
     "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
-    "incremental": true,
-    "forceConsistentCasingInFileNames": true,
-    // TODO: Remove Next.js plugin if not using Next.js framework
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ]
+    "forceConsistentCasingInFileNames": true
   },
-  // TODO: Remove .next/types/**/*.ts if not using Next.js framework
-  "include": ["**/*.ts", "**/*.tsx", "**/*.mts", "**/*.js", "**/*.jsx", ".next/types/**/*.ts"],
+  "include": ["src/**/*.ts", "src/**/*.svelte", "src/**/*.js"],
   "exclude": ["node_modules", "dist", "build"]
 }
