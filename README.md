@@ -15,7 +15,3 @@ pnpm dev
 pnpm check
 pnpm build
 ```
-
-## Architecture & Ramp-Up Notes
-
-See [`docs/2026-09-02_Svelte-Ramp-up-Plan.md`](./docs/2026-09-02_Svelte-Ramp-up-Plan.md) for full documentation on Svelte 5 runes (`$state`, `$derived`, `$props`, `$effect`), zero-VDOM spatial data architecture, and comparison matrix.

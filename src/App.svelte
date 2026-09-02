@@ -1,223 +1,172 @@
 <script lang="ts">
-  // What: Svelte 5 Root Demo Component with Runes ($state, $derived, $effect).
-  // When: Renders the interactive sandbox UI demonstrating geospatial state management for spatial data portals.
-  // Why: Proves hands-on mastery of Svelte 5's reactivity model, compile-time reactivity, and TypeScript typing.
+  /**
+   * Svelte 5 Spatial Architecture Sandbox Root.
+   * What: Root orchestrator component integrating OpenLayers mapping, SvelteKit SSR architecture, and Svelte 5 runes.
+   * When: Main application entry point for the 1-svelte spatial frontend sandbox.
+   * Why: Serves as interactive proof of Svelte 5 reactivity, spatial data streaming, and Senior Frontend readiness.
+   */
 
-  interface SpatialLayer {
-    id: string;
-    name: string;
-    type: "WMS" | "WFS" | "VectorTiles";
-    endpoint: string;
-    visible: boolean;
-  }
+  import SpatialMap from "./components/SpatialMap.svelte";
+  import LayerControls from "./components/LayerControls.svelte";
+  import SvelteKitArchitecture from "./components/SvelteKitArchitecture.svelte";
+  import { spatialStore } from "./services/spatialStore.svelte";
 
-  // Svelte 5 Rune: $state for reactive variables
-  let zoom = $state<number>(12);
-  let activeTab = $state<"layers" | "stats" | "architecture">("layers");
-  let searchQuery = $state<string>("");
+  // Tab navigation state using Svelte 5 $state rune
+  let activeTab = $state<"map" | "sveltekit" | "runes" | "telemetry">("map");
 
-  let layers = $state<SpatialLayer[]>([
-    {
-      id: "ortho-2025",
-      name: "National Orthophoto (Spring 2025)",
-      type: "WMS",
-      endpoint: "https://services.datafordeler.dk/GeoDanmark/WMS",
-      visible: true,
-    },
-    {
-      id: "dhm-terrain",
-      name: "Digital Elevation Model (DTM Terrain)",
-      type: "WMS",
-      endpoint: "https://services.datafordeler.dk/DHM/WMS",
-      visible: false,
-    },
-    {
-      id: "cadastral-matrikel",
-      name: "Cadastral Map (Parcels & Boundaries)",
-      type: "VectorTiles",
-      endpoint: "https://services.datafordeler.dk/Matrikel/VectorTiles",
-      visible: true,
-    },
-    {
-      id: "climate-flood-100yr",
-      name: "Climate Adaptation 100-Year Event",
-      type: "WFS",
-      endpoint: "https://klimadatastyrelsen.dk/api/v1/flood",
-      visible: false,
-    },
-  ]);
-
-  // Svelte 5 Rune: $derived for computed values
-  let visibleLayerCount = $derived(layers.filter((l) => l.visible).length);
-
-  let filteredLayers = $derived(
-    layers.filter((l) =>
-      l.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      l.type.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-  );
-
-  let estimatedTileCount = $derived(Math.pow(2, zoom) * Math.max(1, visibleLayerCount));
-
-  // Svelte 5 Rune: $effect for side effects
-  $effect(() => {
-    console.log(`[Svelte 5 State Sync] Active zoom: ${zoom} | Visible layers: ${visibleLayerCount}`);
-  });
-
-  const toggleLayer = (id: string) => {
-    const layer = layers.find((l) => l.id === id);
-    if (layer) {
-      layer.visible = !layer.visible;
-    }
-  };
-
-  const setZoom = (delta: number) => {
-    zoom = Math.min(20, Math.max(1, zoom + delta));
-  };
+  // Derived telemetry metrics
+  const activeLayersCount = $derived(spatialStore.activeLayerCount);
+  const zoomLevel = $derived(Math.round(spatialStore.zoom));
+  const tileCount = $derived(spatialStore.estimatedTileLoad);
 </script>
 
-<main class="container">
-  <header class="header">
-    <div class="logo-group">
-      <span class="badge">Svelte 5 + TS</span>
+<main class="app-layout">
+  <header class="app-header">
+    <div class="brand-row">
+      <span class="version-badge">Svelte 5 Runes + TS</span>
       <h1>Spatial Data Architecture Sandbox</h1>
     </div>
-    <p class="subtitle">
-      Modern spatial frontend architecture pilot using Svelte 5 Runes, TypeScript, and Vite.
+    <p class="lead-text">
+      Danish geospatial infrastructure sandbox: OpenLayers integration, SvelteKit 2 SSR loaders, and fine-grained signal reactivity.
     </p>
   </header>
 
-  <section class="tab-bar">
+  <nav class="nav-tabs">
     <button
-      class="tab-btn"
-      class:active={activeTab === "layers"}
-      onclick={() => (activeTab = "layers")}
+      class="nav-btn"
+      class:active={activeTab === "map"}
+      onclick={() => (activeTab = "map")}
     >
-      Spatial Layers ({visibleLayerCount} active)
+      OpenLayers Map ({activeLayersCount} Active)
     </button>
     <button
-      class="tab-btn"
-      class:active={activeTab === "stats"}
-      onclick={() => (activeTab = "stats")}
+      class="nav-btn"
+      class:active={activeTab === "sveltekit"}
+      onclick={() => (activeTab = "sveltekit")}
+    >
+      SvelteKit SSR & Routing
+    </button>
+    <button
+      class="nav-btn"
+      class:active={activeTab === "runes"}
+      onclick={() => (activeTab = "runes")}
+    >
+      Runes vs React Matrix
+    </button>
+    <button
+      class="nav-btn"
+      class:active={activeTab === "telemetry"}
+      onclick={() => (activeTab = "telemetry")}
     >
       Reactive Telemetry
     </button>
-    <button
-      class="tab-btn"
-      class:active={activeTab === "architecture"}
-      onclick={() => (activeTab = "architecture")}
-    >
-      Svelte 5 Runes Reference
-    </button>
-  </section>
+  </nav>
 
-  {#if activeTab === "layers"}
-    <section class="card">
-      <div class="card-header">
-        <h2>Spatial Data Services (OGC & Vector Tiles)</h2>
-        <input
-          type="search"
-          placeholder="Filter by layer name or protocol..."
-          class="search-input"
-          bind:value={searchQuery}
-        />
-      </div>
-
-      <div class="layer-list">
-        {#each filteredLayers as layer (layer.id)}
-          <div class="layer-item" class:selected={layer.visible}>
-            <div class="layer-info">
-              <span class="layer-name">{layer.name}</span>
-              <span class="layer-meta">
-                <span class="chip {layer.type.toLowerCase()}">{layer.type}</span>
-                <code>{layer.endpoint}</code>
-              </span>
-            </div>
-            <button
-              class="toggle-btn"
-              class:on={layer.visible}
-              onclick={() => toggleLayer(layer.id)}
-            >
-              {layer.visible ? "Active" : "Disabled"}
-            </button>
-          </div>
-        {/each}
+  {#if activeTab === "map"}
+    <section class="view-panel">
+      <div class="map-grid">
+        <SpatialMap initialZoom={7} initialLon={10.5} initialLat={56.0} />
+        <LayerControls />
       </div>
     </section>
   {/if}
 
-  {#if activeTab === "stats"}
-    <section class="card">
-      <h2>Reactive Zoom & Tile Computation ($derived)</h2>
-      <div class="zoom-controls">
-        <button class="action-btn" onclick={() => setZoom(-1)}>-</button>
-        <span class="zoom-display">Zoom Level: <strong>{zoom}</strong></span>
-        <button class="action-btn" onclick={() => setZoom(1)}>+</button>
+  {#if activeTab === "sveltekit"}
+    <section class="view-panel">
+      <div class="panel-intro">
+        <h2>SvelteKit 2 Server & Universal Data Flow</h2>
+        <p>Patterns for securing GIS tokens, streaming GeoJSON polygons, and server actions.</p>
       </div>
-
-      <div class="grid-metrics">
-        <div class="metric-card">
-          <span class="metric-label">Active Layers</span>
-          <span class="metric-value">{visibleLayerCount} / {layers.length}</span>
-        </div>
-        <div class="metric-card">
-          <span class="metric-label">Estimated Tile Load</span>
-          <span class="metric-value">{estimatedTileCount.toLocaleString()} tiles</span>
-        </div>
-        <div class="metric-card">
-          <span class="metric-label">Reactivity Model</span>
-          <span class="metric-value code-text">Fine-grained Proxy ($state)</span>
-        </div>
-      </div>
+      <SvelteKitArchitecture />
     </section>
   {/if}
 
-  {#if activeTab === "architecture"}
-    <section class="card">
-      <h2>Svelte 5 vs. Svelte 4 / React Matrix</h2>
-      <div class="table-wrapper">
-        <table class="matrix-table">
+  {#if activeTab === "runes"}
+    <section class="view-panel">
+      <div class="panel-intro">
+        <h2>Svelte 5 Runes vs Svelte 4 / React 19</h2>
+        <p>Architectural comparison of reactivity primitives, compile-time proxies, and performance.</p>
+      </div>
+      <div class="table-container">
+        <table class="comparison-table">
           <thead>
             <tr>
-              <th>Feature</th>
+              <th>Capability</th>
+              <th>Svelte 5 (Runes)</th>
               <th>Svelte 4 (Legacy)</th>
-              <th>Svelte 5 (Runes / Modern)</th>
-              <th>React 19 Equivalent</th>
+              <th>React 19</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td><strong>Local State</strong></td>
-              <td><code>let count = 0;</code></td>
-              <td><code>let count = $state(0);</code></td>
+              <td><strong>Reactive State</strong></td>
+              <td><code>let val = $state(0);</code></td>
+              <td><code>let val = 0;</code></td>
               <td><code>useState(0)</code></td>
             </tr>
             <tr>
               <td><strong>Computed State</strong></td>
-              <td><code>$: doubled = count * 2;</code></td>
-              <td><code>let doubled = $derived(count * 2);</code></td>
+              <td><code>let d = $derived(val * 2);</code></td>
+              <td><code>$: d = val * 2;</code></td>
               <td><code>useMemo(...)</code></td>
             </tr>
             <tr>
-              <td><strong>Props</strong></td>
-              <td><code>export let name = 'default';</code></td>
-              <td><code>let &#123; name = 'default' &#125; = $props();</code></td>
-              <td><code>props.name</code></td>
+              <td><strong>Component Props</strong></td>
+              <td><code>let &#123; title &#125; = $props();</code></td>
+              <td><code>export let title;</code></td>
+              <td><code>props.title</code></td>
             </tr>
             <tr>
               <td><strong>Side Effects</strong></td>
-              <td><code>$: console.log(count);</code></td>
-              <td><code>$effect(() =&gt; console.log(count));</code></td>
+              <td><code>$effect(() =&gt; ...);</code></td>
+              <td><code>$: ...</code></td>
               <td><code>useEffect(...)</code></td>
             </tr>
             <tr>
-              <td><strong>DOM Events</strong></td>
-              <td><code>on:click=&#123;...&#125;</code></td>
+              <td><strong>Global / Universal State</strong></td>
+              <td><code>.svelte.ts</code> files (native)</td>
+              <td><code>writable()</code> stores</td>
+              <td>Context / Zustand / Redux</td>
+            </tr>
+            <tr>
+              <td><strong>DOM Event Syntax</strong></td>
               <td><code>onclick=&#123;...&#125;</code></td>
+              <td><code>on:click=&#123;...&#125;</code></td>
               <td><code>onClick=&#123;...&#125;</code></td>
             </tr>
           </tbody>
         </table>
+      </div>
+    </section>
+  {/if}
+
+  {#if activeTab === "telemetry"}
+    <section class="view-panel">
+      <div class="panel-intro">
+        <h2>Spatial Telemetry & Reactive Computation</h2>
+        <p>Real-time telemetry computed via Svelte 5 $derived runes without manual subscriptions.</p>
+      </div>
+      <div class="telemetry-grid">
+        <div class="card">
+          <span class="card-label">Current Zoom Level</span>
+          <span class="card-value">{zoomLevel}</span>
+          <span class="card-sub">Updated via OpenLayers moveend</span>
+        </div>
+        <div class="card">
+          <span class="card-label">Active Layers</span>
+          <span class="card-value">{activeLayersCount} / {spatialStore.layers.length}</span>
+          <span class="card-sub">Fine-grained layer filter</span>
+        </div>
+        <div class="card">
+          <span class="card-label">Estimated Tile Matrix</span>
+          <span class="card-value">{tileCount.toLocaleString()}</span>
+          <span class="card-sub">Computed via $derived</span>
+        </div>
+        <div class="card">
+          <span class="card-label">Map Engine</span>
+          <span class="card-value code-accent">OpenLayers 10.10</span>
+          <span class="card-sub">Zero-VDOM native DOM target</span>
+        </div>
       </div>
     </section>
   {/if}
@@ -227,264 +176,182 @@
   :global(body) {
     margin: 0;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background-color: #0f172a;
+    background-color: #0b1120;
     color: #f8fafc;
     min-height: 100vh;
   }
 
-  .container {
-    max-width: 900px;
+  .app-layout {
+    max-width: 1040px;
     margin: 0 auto;
-    padding: 2.5rem 1.5rem;
+    padding: 2rem 1.25rem;
   }
 
-  .header {
-    margin-bottom: 2rem;
+  .app-header {
+    margin-bottom: 1.5rem;
   }
 
-  .logo-group {
+  .brand-row {
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    flex-wrap: wrap;
   }
 
-  .badge {
-    background: #f97316;
+  .version-badge {
+    background: #ea580c;
     color: #ffffff;
     font-size: 0.75rem;
     font-weight: 700;
-    padding: 0.25rem 0.5rem;
+    padding: 0.25rem 0.6rem;
     border-radius: 4px;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.04em;
   }
 
   h1 {
-    font-size: 1.75rem;
+    font-size: 1.6rem;
     margin: 0;
     font-weight: 700;
     color: #f1f5f9;
   }
 
-  .subtitle {
+  .lead-text {
     color: #94a3b8;
-    margin-top: 0.5rem;
+    margin: 0.5rem 0 0;
     font-size: 0.95rem;
+    line-height: 1.4;
   }
 
-  .tab-bar {
+  .nav-tabs {
     display: flex;
     gap: 0.5rem;
-    margin-bottom: 1.5rem;
-    border-bottom: 1px solid #334155;
+    margin-bottom: 1.25rem;
+    border-bottom: 1px solid #1e293b;
     padding-bottom: 0.5rem;
+    flex-wrap: wrap;
   }
 
-  .tab-btn {
+  .nav-btn {
     background: transparent;
     border: none;
     color: #94a3b8;
-    padding: 0.6rem 1.1rem;
-    font-size: 0.9rem;
+    padding: 0.55rem 1rem;
+    font-size: 0.85rem;
     font-weight: 600;
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.2s ease;
   }
 
-  .tab-btn:hover {
+  .nav-btn:hover {
     color: #f1f5f9;
     background: #1e293b;
   }
 
-  .tab-btn.active {
+  .nav-btn.active {
     background: #2563eb;
     color: #ffffff;
   }
 
-  .card {
-    background: #1e293b;
-    border: 1px solid #334155;
+  .view-panel {
+    background: #131d31;
+    border: 1px solid #1e293b;
     border-radius: 12px;
-    padding: 1.5rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    padding: 1.25rem;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
   }
 
-  .card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 1.25rem;
-    flex-wrap: wrap;
-  }
-
-  h2 {
-    font-size: 1.2rem;
-    margin: 0;
-    color: #e2e8f0;
-  }
-
-  .search-input {
-    background: #0f172a;
-    border: 1px solid #475569;
-    color: #f8fafc;
-    padding: 0.5rem 0.8rem;
-    border-radius: 6px;
-    font-size: 0.85rem;
-    min-width: 250px;
-  }
-
-  .layer-list {
+  .map-grid {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 1.25rem;
   }
 
-  .layer-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem;
+  .panel-intro {
+    margin-bottom: 1rem;
+  }
+
+  .panel-intro h2 {
+    margin: 0 0 0.25rem;
+    font-size: 1.2rem;
+    color: #f1f5f9;
+  }
+
+  .panel-intro p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #94a3b8;
+  }
+
+  .table-container {
+    overflow-x: auto;
+    margin-top: 0.5rem;
+  }
+
+  .comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+
+  .comparison-table th,
+  .comparison-table td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #1e293b;
+  }
+
+  .comparison-table th {
+    color: #94a3b8;
+    font-weight: 600;
+  }
+
+  .comparison-table code {
+    color: #f97316;
+    background: #0b1120;
+    padding: 0.15rem 0.4rem;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 0.8rem;
+  }
+
+  .telemetry-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    margin-top: 0.5rem;
+  }
+
+  .card {
     background: #0f172a;
-    border: 1px solid #334155;
+    border: 1px solid #1e293b;
     border-radius: 8px;
-    transition: border-color 0.2s;
-  }
-
-  .layer-item.selected {
-    border-color: #3b82f6;
-  }
-
-  .layer-info {
+    padding: 1rem;
     display: flex;
     flex-direction: column;
     gap: 0.35rem;
   }
 
-  .layer-name {
-    font-weight: 600;
-    font-size: 0.95rem;
-  }
-
-  .layer-meta {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .chip {
-    font-size: 0.7rem;
-    font-weight: 700;
-    padding: 0.15rem 0.4rem;
-    border-radius: 3px;
-    text-transform: uppercase;
-  }
-
-  .chip.wms { background: #0369a1; color: #e0f2fe; }
-  .chip.wfs { background: #b45309; color: #fef3c7; }
-  .chip.vectortiles { background: #4d7c0f; color: #ecfccb; }
-
-  code {
+  .card-label {
     font-size: 0.75rem;
     color: #64748b;
-    font-family: monospace;
-  }
-
-  .toggle-btn {
-    padding: 0.4rem 0.9rem;
-    border-radius: 6px;
-    font-size: 0.8rem;
     font-weight: 600;
-    cursor: pointer;
-    border: 1px solid #475569;
-    background: #334155;
-    color: #cbd5e1;
-    transition: all 0.2s ease;
   }
 
-  .toggle-btn.on {
-    background: #16a34a;
-    border-color: #22c55e;
-    color: #ffffff;
-  }
-
-  .zoom-controls {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin: 1.5rem 0;
-  }
-
-  .action-btn {
-    background: #2563eb;
-    color: #ffffff;
-    border: none;
-    width: 36px;
-    height: 36px;
-    border-radius: 6px;
-    font-size: 1.25rem;
-    font-weight: 700;
-    cursor: pointer;
-  }
-
-  .zoom-display {
-    font-size: 1.1rem;
-    color: #cbd5e1;
-  }
-
-  .grid-metrics {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-    margin-top: 1rem;
-  }
-
-  .metric-card {
-    background: #0f172a;
-    padding: 1rem;
-    border-radius: 8px;
-    border: 1px solid #334155;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .metric-label {
-    font-size: 0.8rem;
-    color: #94a3b8;
-  }
-
-  .metric-value {
-    font-size: 1.25rem;
+  .card-value {
+    font-size: 1.4rem;
     font-weight: 700;
     color: #f8fafc;
   }
 
-  .code-text {
-    font-family: monospace;
-    font-size: 0.95rem;
-    color: #38bdf8;
-  }
-
-  .matrix-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.85rem;
-    margin-top: 1rem;
-  }
-
-  .matrix-table th, .matrix-table td {
-    padding: 0.75rem;
-    text-align: left;
-    border-bottom: 1px solid #334155;
-  }
-
-  .matrix-table th {
+  .card-sub {
+    font-size: 0.75rem;
     color: #94a3b8;
-    font-weight: 600;
   }
 
-  .matrix-table code {
-    color: #f97316;
+  .code-accent {
+    font-family: monospace;
+    font-size: 1.1rem;
+    color: #38bdf8;
   }
 </style>
