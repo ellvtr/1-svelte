@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "forceConsistentCasingInFileNames": true,
+    // TODO: Remove Next.js plugin if not using Next.js framework
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
+  },
+  // TODO: Remove .next/types/**/*.ts if not using Next.js framework
+  "include": ["**/*.ts", "**/*.tsx", "**/*.mts", "**/*.js", "**/*.jsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules", "dist", "build"]
+}
