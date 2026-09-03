@@ -10,11 +10,17 @@
   import { onMount } from "svelte";
   import Map from "ol/Map";
   import View from "ol/View";
+  import BaseLayer from "ol/layer/Base";
   import TileLayer from "ol/layer/Tile";
+  import VectorLayer from "ol/layer/Vector";
   import XYZ from "ol/source/XYZ";
   import TileWMS from "ol/source/TileWMS";
+  import VectorSource from "ol/source/Vector";
+  import GeoJSON from "ol/format/GeoJSON";
+  import { Style, Stroke, Fill, Text } from "ol/style";
   import { fromLonLat, toLonLat } from "ol/proj";
   import { spatialStore } from "../services/spatialStore.svelte";
+  import { danishCadastralGeoJson } from "../data/cadastralParcels";
   import type { LayerConfig } from "../types/spatial";
 
   // Component props using Svelte 5 $props
@@ -31,17 +37,57 @@
   let mapInstance = $state<Map | null>(null);
 
   // Plain record mapping layer ID to OpenLayers layer instance
-  let layerRegistry: Record<string, TileLayer<XYZ | TileWMS>> = {};
+  let layerRegistry: Record<string, BaseLayer> = {};
 
   // Derived telemetry
   const currentCenter = $derived(spatialStore.center);
   const activeCount = $derived(spatialStore.activeLayerCount);
   const cursorCoords = $derived(spatialStore.cursorPosition);
+  const currentZoom = $derived(spatialStore.zoom);
 
   /**
-   * Creates an OpenLayers TileLayer from a store LayerConfig.
+   * Creates styled OpenLayers layer (TileLayer or VectorLayer) from store LayerConfig.
    */
-  const createOlLayer = (config: LayerConfig): TileLayer<XYZ | TileWMS> => {
+  const createOlLayer = (config: LayerConfig): BaseLayer => {
+    if (config.type === "Vector") {
+      // Create Vector Layer with Danish Cadastral Parcels and Boundary Labels
+      const features = new GeoJSON().readFeatures(danishCadastralGeoJson, {
+        featureProjection: "EPSG:3857",
+      });
+
+      const vectorSource = new VectorSource({ features });
+
+      return new VectorLayer({
+        source: vectorSource,
+        visible: config.visible,
+        opacity: config.opacity,
+        minZoom: 12,
+        style: (feature) => {
+          const matrikelnr = String(feature.get("matrikelnr") ?? "");
+          const ejerlav = String(feature.get("ejerlav") ?? "");
+
+          return new Style({
+            stroke: new Stroke({
+              color: "#ea580c",
+              width: 2,
+              lineDash: [4, 3],
+            }),
+            fill: new Fill({
+              color: "rgba(234, 88, 12, 0.18)",
+            }),
+            text: new Text({
+              text: `Matr. ${matrikelnr}\n(${ejerlav})`,
+              font: "bold 11px -apple-system, sans-serif",
+              fill: new Fill({ color: "#f8fafc" }),
+              stroke: new Stroke({ color: "#0f172a", width: 3 }),
+              offsetY: 0,
+              textAlign: "center",
+            }),
+          });
+        },
+      });
+    }
+
     if (config.type === "WMS") {
       return new TileLayer({
         source: new TileWMS({
@@ -55,7 +101,7 @@
       });
     }
 
-    // Default to XYZ tile layer
+    // Default to XYZ raster tile layer
     return new TileLayer({
       source: new XYZ({
         url: config.url,
@@ -73,7 +119,7 @@
 
     // Clear registry and build all layers from store
     layerRegistry = {};
-    const olLayers: TileLayer<XYZ | TileWMS>[] = [];
+    const olLayers: BaseLayer[] = [];
 
     for (const layerConfig of spatialStore.layers) {
       const olLayer = createOlLayer(layerConfig);
@@ -155,6 +201,18 @@
   };
 
   /**
+   * Zooms directly to a city center at street parcel scale.
+   */
+  const zoomToCity = (lon: number, lat: number): void => {
+    if (!mapInstance) return;
+    mapInstance.getView().animate({
+      center: fromLonLat([lon, lat]),
+      zoom: 15,
+      duration: 600,
+    });
+  };
+
+  /**
    * Adjusts zoom by relative delta.
    */
   const handleZoom = (delta: number): void => {
@@ -175,9 +233,27 @@
     <div class="btn-group">
       <button class="ctrl-btn" onclick={() => handleZoom(1)} title="Zoom In">+</button>
       <button class="ctrl-btn" onclick={() => handleZoom(-1)} title="Zoom Out">-</button>
-      <button class="ctrl-btn reset" onclick={resetToDenmark} title="Reset View">DK</button>
+      <button class="ctrl-btn reset" onclick={resetToDenmark} title="Overview DK">DK</button>
+    </div>
+
+    <div class="city-jump-group">
+      <button class="city-btn" onclick={() => zoomToCity(10.2045, 56.1530)} title="Zoom to Aarhus Parcels">
+        Aarhus
+      </button>
+      <button class="city-btn" onclick={() => zoomToCity(10.3880, 55.3990)} title="Zoom to Odense Parcels">
+        Odense
+      </button>
+      <button class="city-btn" onclick={() => zoomToCity(12.5700, 55.6750)} title="Zoom to KBH Parcels">
+        KBH
+      </button>
     </div>
   </div>
+
+  {#if currentZoom < 12 && spatialStore.layers.find(l => l.id === "matrikel-vector")?.visible}
+    <div class="zoom-hint">
+      Zoom in to level 12+ (or click a city button) to render cadastral parcels
+    </div>
+  {/if}
 
   <footer class="telemetry-bar">
     <div class="telemetry-item">
@@ -223,9 +299,17 @@
     top: 12px;
     left: 12px;
     z-index: 10;
+    display: flex;
+    gap: 8px;
   }
 
   .btn-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .city-jump-group {
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -256,6 +340,41 @@
     font-size: 0.75rem;
     font-weight: 800;
     background: #0f172a;
+  }
+
+  .city-btn {
+    padding: 0.25rem 0.5rem;
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(4px);
+    border: 1px solid #334155;
+    color: #cbd5e1;
+    font-size: 0.7rem;
+    font-weight: 600;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .city-btn:hover {
+    background: #2563eb;
+    color: #ffffff;
+    border-color: #3b82f6;
+  }
+
+  .zoom-hint {
+    position: absolute;
+    bottom: 48px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(15, 23, 42, 0.9);
+    border: 1px solid #ea580c;
+    color: #fdba74;
+    padding: 0.35rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    z-index: 10;
+    pointer-events: none;
   }
 
   .telemetry-bar {

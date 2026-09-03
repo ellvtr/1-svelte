@@ -11,7 +11,7 @@
   // Svelte 5 state for active pattern selection
   let selectedPatternId = $state<string>("page-server");
 
-  // Pattern catalogue data
+  // Pattern catalogue data with safe non-bundled snippet strings
   const patterns: SvelteKitPatternInfo[] = [
     {
       name: "Server-Only Loader (+page.server.ts)",
@@ -19,8 +19,13 @@
       scope: "Server",
       description:
         "Executes strictly in Node.js/Edge runtime on the server. Safely injects private Datafordeler tokens, queries spatial databases (PostGIS/Supabase), and streams GeoJSON to the client.",
-      exampleSnippet: `import type { PageServerLoad } from './$types';
-import { env } from '$env/dynamic/private';
+      exampleSnippet:
+        `// Server-only data loader (+page.server.ts)
+` +
+        `import type { PageServerLoad } from './$types';
+` +
+        `import { env } from '$` +
+        `env/dynamic/private';
 
 export const load: PageServerLoad = async ({ fetch, depends }) => {
   depends('spatial:layers');
@@ -42,7 +47,10 @@ export const load: PageServerLoad = async ({ fetch, depends }) => {
       scope: "Universal",
       description:
         "Runs on server during SSR initial page render, then runs strictly on client during subsequent client-side SPA navigations. Ideal for public OGC capability caching.",
-      exampleSnippet: `import type { PageLoad } from './$types';
+      exampleSnippet:
+        `// Universal data loader (+page.ts)
+` +
+        `import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ fetch, data }) => {
   // data contains output from +page.server.ts if present
@@ -61,8 +69,13 @@ export const load: PageLoad = async ({ fetch, data }) => {
       scope: "Server",
       description:
         "Handles form submissions, spatial polygon queries, and mutation requests with progressive enhancement (runs even without client JavaScript).",
-      exampleSnippet: `import type { Actions } from './$types';
-import { fail } from '@sveltejs/kit';
+      exampleSnippet:
+        `// Form mutation server action (+page.server.ts)
+` +
+        `import type { Actions } from './$types';
+` +
+        `import { fail } from '@` +
+        `sveltejs/kit';
 
 export const actions: Actions = {
   savePolygon: async ({ request, locals }) => {
@@ -87,7 +100,8 @@ export const actions: Actions = {
       exampleSnippet:
         `<` +
         `script lang="ts">
-  import type { PageData, ActionData } from './$types';
+  ` +
+        `import type { PageData, ActionData } from './$types';
 
   // Svelte 5 Rune for page properties:
   let { data, form }: { data: PageData; form: ActionData } = $props();

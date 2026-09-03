@@ -11,7 +11,7 @@ import type { LayerConfig, MapCoordinate } from "../types/spatial";
  * Creates and exports the spatial state manager using Svelte 5 universal runes.
  */
 export const createSpatialStore = () => {
-  // Layer catalog state with public CORS-friendly spatial tiles and WMS options
+  // Layer catalog state with OSM at 50% opacity and Cadastral Vector disabled by default
   const layers = $state<LayerConfig[]>([
     {
       id: "osm-base",
@@ -19,8 +19,17 @@ export const createSpatialStore = () => {
       type: "XYZ",
       url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
       visible: true,
-      opacity: 1.0,
+      opacity: 0.5,
       attribution: "© OpenStreetMap contributors",
+    },
+    {
+      id: "matrikel-vector",
+      name: "Matrikelskel (Cadastral Parcels & Boundaries)",
+      type: "Vector",
+      url: "geo://cadastral-parcels-dk",
+      visible: false,
+      opacity: 1.0,
+      attribution: "Geodatastyrelsen / Matrikelkortet DK",
     },
     {
       id: "ortho-danmark",
@@ -39,15 +48,6 @@ export const createSpatialStore = () => {
       visible: false,
       opacity: 0.7,
       attribution: "OpenTopoMap / Klimadatastyrelsen DTM",
-    },
-    {
-      id: "matrikel-vector",
-      name: "Matrikelskel & Cadastral Reference Overlay",
-      type: "XYZ",
-      url: "https://basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}.png",
-      visible: false,
-      opacity: 0.95,
-      attribution: "CartoDB / Geodatastyrelsen Reference",
     },
   ]);
 
