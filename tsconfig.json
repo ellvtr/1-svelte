@@ -13,6 +13,14 @@
     "isolatedModules": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src/**/*.ts", "src/**/*.svelte", "src/**/*.js"],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.svelte",
+    "src/**/*.js",
+    "scripts/**/*.mts",
+    "scripts/**/*.ts",
+    "*.config.ts",
+    "*.config.js"
+  ],
   "exclude": ["node_modules", "dist", "build"]
 }
