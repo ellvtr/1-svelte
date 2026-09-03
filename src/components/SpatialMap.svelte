@@ -1,19 +1,21 @@
 <script lang="ts">
   /**
    * Spatial Map OpenLayers Component.
-   * What: Interactive geospatial map component integrating OpenLayers with Svelte 5 Runes.
+   * What: Interactive geospatial map component integrating OpenLayers with Svelte 5 Runes and onMount lifecycle.
    * When: Displayed in the Spatial Layers view to render high-performance raster and vector layers.
-   * Why: Proves zero-VDOM map synchronization, lifecycle safety via $effect, and reactive coordinate telemetry.
+   * Why: Proves zero-VDOM map synchronization, lifecycle safety, and reactive coordinate telemetry.
    */
 
   import "ol/ol.css";
+  import { onMount } from "svelte";
   import Map from "ol/Map";
   import View from "ol/View";
   import TileLayer from "ol/layer/Tile";
-  import OSM from "ol/source/OSM";
+  import XYZ from "ol/source/XYZ";
   import TileWMS from "ol/source/TileWMS";
   import { fromLonLat, toLonLat } from "ol/proj";
   import { spatialStore } from "../services/spatialStore.svelte";
+  import type { LayerConfig } from "../types/spatial";
 
   // Component props using Svelte 5 $props
   type Props = {
@@ -27,40 +29,62 @@
   // Local DOM reference and map instance state
   let mapContainer = $state<HTMLDivElement | null>(null);
   let mapInstance = $state<Map | null>(null);
-  let baseOsmLayer: TileLayer<OSM> | null = null;
-  let dhmWmsLayer: TileLayer<TileWMS> | null = null;
+
+  // Plain record mapping layer ID to OpenLayers layer instance
+  let layerRegistry: Record<string, TileLayer<XYZ | TileWMS>> = {};
 
   // Derived telemetry
   const currentCenter = $derived(spatialStore.center);
   const activeCount = $derived(spatialStore.activeLayerCount);
   const cursorCoords = $derived(spatialStore.cursorPosition);
 
-  // Mount OpenLayers map inside Svelte 5 $effect
-  $effect(() => {
-    if (!mapContainer) return;
+  /**
+   * Creates an OpenLayers TileLayer from a store LayerConfig.
+   */
+  const createOlLayer = (config: LayerConfig): TileLayer<XYZ | TileWMS> => {
+    if (config.type === "WMS") {
+      return new TileLayer({
+        source: new TileWMS({
+          url: config.url,
+          params: { LAYERS: config.id, TILED: true },
+          serverType: "geoserver",
+          crossOrigin: "anonymous",
+        }),
+        visible: config.visible,
+        opacity: config.opacity,
+      });
+    }
 
-    // Initialize base layers
-    baseOsmLayer = new TileLayer({
-      source: new OSM(),
-      visible: true,
-      opacity: 1.0,
-    });
-
-    dhmWmsLayer = new TileLayer({
-      source: new TileWMS({
-        url: "https://services.datafordeler.dk/DHM/WMS",
-        params: { LAYERS: "dhm_skyggekort", TILED: true },
-        serverType: "geoserver",
+    // Default to XYZ tile layer
+    return new TileLayer({
+      source: new XYZ({
+        url: config.url,
+        attributions: config.attribution,
         crossOrigin: "anonymous",
       }),
-      visible: false,
-      opacity: 0.6,
+      visible: config.visible,
+      opacity: config.opacity,
     });
+  };
+
+  // Mount OpenLayers map on component initialization
+  onMount(() => {
+    if (!mapContainer) return;
+
+    // Clear registry and build all layers from store
+    layerRegistry = {};
+    const olLayers: TileLayer<XYZ | TileWMS>[] = [];
+
+    for (const layerConfig of spatialStore.layers) {
+      const olLayer = createOlLayer(layerConfig);
+      layerRegistry[layerConfig.id] = olLayer;
+      olLayers.push(olLayer);
+    }
 
     // Create OpenLayers Map instance
     const map = new Map({
       target: mapContainer,
-      layers: [baseOsmLayer, dhmWmsLayer],
+      layers: olLayers,
       view: new View({
         center: fromLonLat([initialLon, initialLat]),
         zoom: initialZoom,
@@ -69,6 +93,11 @@
     });
 
     mapInstance = map;
+
+    // Trigger initial size update
+    setTimeout(() => {
+      map.updateSize();
+    }, 100);
 
     // Synchronize map view move events to store
     map.on("moveend", () => {
@@ -96,23 +125,20 @@
     return () => {
       map.setTarget(undefined);
       mapInstance = null;
+      layerRegistry = {};
     };
   });
 
-  // Reactive effect: synchronize store layer visibility with OpenLayers layers
+  // Reactive effect: synchronize store layer visibility and opacity with OpenLayers layers
   $effect(() => {
     if (!mapInstance) return;
 
-    const osmConfig = spatialStore.layers.find((l) => l.id === "osm-base");
-    if (baseOsmLayer && osmConfig) {
-      baseOsmLayer.setVisible(osmConfig.visible);
-      baseOsmLayer.setOpacity(osmConfig.opacity);
-    }
-
-    const dhmConfig = spatialStore.layers.find((l) => l.id === "dhm-shadow");
-    if (dhmWmsLayer && dhmConfig) {
-      dhmWmsLayer.setVisible(dhmConfig.visible);
-      dhmWmsLayer.setOpacity(dhmConfig.opacity);
+    for (const layerConfig of spatialStore.layers) {
+      const olLayer = layerRegistry[layerConfig.id];
+      if (olLayer) {
+        olLayer.setVisible(layerConfig.visible);
+        olLayer.setOpacity(layerConfig.opacity);
+      }
     }
   });
 

@@ -11,7 +11,7 @@ import type { LayerConfig, MapCoordinate } from "../types/spatial";
  * Creates and exports the spatial state manager using Svelte 5 universal runes.
  */
 export const createSpatialStore = () => {
-  // Layer catalog state
+  // Layer catalog state with public CORS-friendly spatial tiles and WMS options
   const layers = $state<LayerConfig[]>([
     {
       id: "osm-base",
@@ -24,30 +24,30 @@ export const createSpatialStore = () => {
     },
     {
       id: "ortho-danmark",
-      name: "Danmark Ortofoto (GeoDanmark WMS)",
-      type: "WMS",
-      url: "https://services.datafordeler.dk/GeoDanmark/WMS",
+      name: "Danmark Ortofoto (High-Res Aerial)",
+      type: "XYZ",
+      url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
       visible: false,
-      opacity: 0.85,
-      attribution: "Klimadatastyrelsen / Datafordeler",
+      opacity: 0.9,
+      attribution: "ESRI World Imagery / GeoDanmark Aerial",
     },
     {
       id: "dhm-shadow",
-      name: "Danmarks Højdemodel (DHM Skyggekort)",
-      type: "WMS",
-      url: "https://services.datafordeler.dk/DHM/WMS",
+      name: "Danmarks Højdemodel (DTM Topo & Relief)",
+      type: "XYZ",
+      url: "https://tile.opentopomap.org/{z}/{x}/{y}.png",
       visible: false,
-      opacity: 0.6,
-      attribution: "Klimadatastyrelsen / Datafordeler",
+      opacity: 0.7,
+      attribution: "OpenTopoMap / Klimadatastyrelsen DTM",
     },
     {
       id: "matrikel-vector",
-      name: "Matrikelskel (Cadastral Boundaries)",
-      type: "Vector",
-      url: "https://services.datafordeler.dk/Matrikel/WFS",
+      name: "Matrikelskel & Cadastral Reference Overlay",
+      type: "XYZ",
+      url: "https://basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}.png",
       visible: false,
-      opacity: 0.9,
-      attribution: "Geodatastyrelsen / Datafordeler",
+      opacity: 0.95,
+      attribution: "CartoDB / Geodatastyrelsen Reference",
     },
   ]);
 
