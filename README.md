@@ -11,6 +11,9 @@ pnpm install
 # Start local development server (http://localhost:5173)
 pnpm dev
 
+# Start dev server & launch Chrome with remote debugging on port 9222
+pnpm dev:chrome
+
 # Type check & production build
 pnpm check
 pnpm build
