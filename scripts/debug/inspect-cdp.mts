@@ -85,7 +85,7 @@ export const main = async (): Promise<void> => {
           expression,
           returnByValue: true,
         },
-      })
+      }),
     );
   };
 

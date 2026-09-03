@@ -44,7 +44,13 @@ export const main = async (): Promise<void> => {
       };
     })()`;
 
-    ws.send(JSON.stringify({ id: 1, method: "Runtime.evaluate", params: { expression, returnByValue: true } }));
+    ws.send(
+      JSON.stringify({
+        id: 1,
+        method: "Runtime.evaluate",
+        params: { expression, returnByValue: true },
+      }),
+    );
   };
 
   ws.onmessage = (event) => {

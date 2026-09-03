@@ -49,7 +49,13 @@ export const main = async (): Promise<void> => {
       }
     })()`;
 
-    ws.send(JSON.stringify({ id: 3, method: "Runtime.evaluate", params: { expression, returnByValue: true } }));
+    ws.send(
+      JSON.stringify({
+        id: 3,
+        method: "Runtime.evaluate",
+        params: { expression, returnByValue: true },
+      }),
+    );
   };
 
   ws.onmessage = (event) => {
@@ -58,7 +64,11 @@ export const main = async (): Promise<void> => {
       console.error("[cdp exception]", msg.params.exceptionDetails);
     }
     if (msg.method === "Runtime.consoleAPICalled") {
-      console.log("[cdp console]", msg.params.type, msg.params.args.map((a: { value?: unknown }) => a.value));
+      console.log(
+        "[cdp console]",
+        msg.params.type,
+        msg.params.args.map((a: { value?: unknown }) => a.value),
+      );
     }
     if (msg.id === 3) {
       console.log("[cdp DOM check]", msg.result?.result?.value);

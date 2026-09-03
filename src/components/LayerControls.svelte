@@ -16,8 +16,8 @@
     spatialStore.layers.filter(
       (layer) =>
         layer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        layer.type.toLowerCase().includes(searchQuery.toLowerCase())
-    )
+        layer.type.toLowerCase().includes(searchQuery.toLowerCase()),
+    ),
   );
 </script>
 
@@ -59,7 +59,7 @@
                 oninput={(e) =>
                   spatialStore.setLayerOpacity(
                     layer.id,
-                    parseFloat((e.target as HTMLInputElement).value)
+                    parseFloat((e.target as HTMLInputElement).value),
                   )}
                 class="opacity-slider"
               />

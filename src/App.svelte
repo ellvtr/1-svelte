@@ -27,16 +27,13 @@
       <h1>Spatial Data Architecture Sandbox</h1>
     </div>
     <p class="lead-text">
-      Danish geospatial infrastructure sandbox: OpenLayers integration, SvelteKit 2 SSR loaders, and fine-grained signal reactivity.
+      Danish geospatial infrastructure sandbox: OpenLayers integration, SvelteKit 2 SSR loaders, and
+      fine-grained signal reactivity.
     </p>
   </header>
 
   <nav class="nav-tabs">
-    <button
-      class="nav-btn"
-      class:active={activeTab === "map"}
-      onclick={() => (activeTab = "map")}
-    >
+    <button class="nav-btn" class:active={activeTab === "map"} onclick={() => (activeTab = "map")}>
       OpenLayers Map ({activeLayersCount} Active)
     </button>
     <button
@@ -85,7 +82,9 @@
     <section class="view-panel">
       <div class="panel-intro">
         <h2>Svelte 5 Runes vs Svelte 4 / React 19</h2>
-        <p>Architectural comparison of reactivity primitives, compile-time proxies, and performance.</p>
+        <p>
+          Architectural comparison of reactivity primitives, compile-time proxies, and performance.
+        </p>
       </div>
       <div class="table-container">
         <table class="comparison-table">
@@ -144,7 +143,9 @@
     <section class="view-panel">
       <div class="panel-intro">
         <h2>Spatial Telemetry & Reactive Computation</h2>
-        <p>Real-time telemetry computed via Svelte 5 $derived runes without manual subscriptions.</p>
+        <p>
+          Real-time telemetry computed via Svelte 5 $derived runes without manual subscriptions.
+        </p>
       </div>
       <div class="telemetry-grid">
         <div class="card">
@@ -175,7 +176,8 @@
 <style>
   :global(body) {
     margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family:
+      -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background-color: #0b1120;
     color: #f8fafc;
     min-height: 100vh;

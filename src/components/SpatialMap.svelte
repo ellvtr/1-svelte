@@ -187,7 +187,9 @@
     <div class="telemetry-item">
       <span class="label">Cursor:</span>
       <span class="value">
-        {cursorCoords ? `${cursorCoords.lat.toFixed(4)}°N, ${cursorCoords.lon.toFixed(4)}°E` : "Hover over map"}
+        {cursorCoords
+          ? `${cursorCoords.lat.toFixed(4)}°N, ${cursorCoords.lon.toFixed(4)}°E`
+          : "Hover over map"}
       </span>
     </div>
     <div class="telemetry-item">

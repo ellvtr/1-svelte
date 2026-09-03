@@ -84,12 +84,15 @@ export const actions: Actions = {
       scope: "Client",
       description:
         "Svelte 5 consumes typed PageData using the $props() rune. Supports fine-grained streaming with {#await} blocks.",
-      exampleSnippet: `<` + `script lang="ts">
+      exampleSnippet:
+        `<` +
+        `script lang="ts">
   import type { PageData, ActionData } from './$types';
 
   // Svelte 5 Rune for page properties:
   let { data, form }: { data: PageData; form: ActionData } = $props();
-<` + `/script>
+<` +
+        `/script>
 
 <h1>Spatial Portal: {data.portalConfig.region}</h1>
 
@@ -105,13 +108,13 @@ export const actions: Actions = {
 
   // Derived selected pattern
   const activePattern = $derived(
-    patterns.find((p) => p.filename.includes(selectedPatternId)) ?? patterns[0]
+    patterns.find((p) => p.filename.includes(selectedPatternId)) ?? patterns[0],
   );
 </script>
 
 <div class="architecture-layout">
   <div class="pattern-nav">
-    {#each patterns as pattern}
+    {#each patterns as pattern (pattern.filename)}
       <button
         class="pattern-tab"
         class:selected={activePattern.filename === pattern.filename}

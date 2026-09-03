@@ -53,13 +53,22 @@ export const main = async (): Promise<void> => {
       };
     })()`;
 
-    ws.send(JSON.stringify({ id: 2, method: "Runtime.evaluate", params: { expression, returnByValue: true } }));
+    ws.send(
+      JSON.stringify({
+        id: 2,
+        method: "Runtime.evaluate",
+        params: { expression, returnByValue: true },
+      }),
+    );
   };
 
   ws.onmessage = (event) => {
     const msg = JSON.parse(event.data.toString());
     if (msg.id === 2) {
-      console.log("[cdp] Multi-toggle results:", JSON.stringify(msg.result?.result?.value, null, 2));
+      console.log(
+        "[cdp] Multi-toggle results:",
+        JSON.stringify(msg.result?.result?.value, null, 2),
+      );
       ws.close();
       process.exit(0);
     }
