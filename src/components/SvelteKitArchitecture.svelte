@@ -7,6 +7,10 @@
    */
 
   import type { SvelteKitPatternInfo } from "../types/spatial";
+  import Prism from "prismjs";
+  import "prismjs/components/prism-typescript";
+  import "prismjs/components/prism-jsx";
+  import "prismjs/components/prism-tsx";
 
   // Reactive selection state: Stores the ID of the currently focused SvelteKit architecture pattern
   let selectedPatternId = $state<string>("page-server-loader");
@@ -138,6 +142,15 @@ export const actions: Actions = {
   const activePattern = $derived(
     patterns.find((p) => p.id === selectedPatternId) ?? patterns[0],
   );
+
+  // Derived state: Pre-computed syntax-highlighted HTML snippet using Prism
+  const highlightedSnippet = $derived(
+    Prism.highlight(
+      activePattern.exampleSnippet,
+      Prism.languages.tsx || Prism.languages.typescript,
+      "tsx"
+    )
+  );
 </script>
 
 <!-- Two-column responsive layout for architectural explorer -->
@@ -174,7 +187,8 @@ export const actions: Actions = {
 
     <!-- Code viewer container displaying the exact SvelteKit file structure -->
     <div class="code-container">
-      <pre><code>{activePattern.exampleSnippet}</code></pre>
+      <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+      <pre><code class="language-tsx">{@html highlightedSnippet}</code></pre>
     </div>
   </div>
 </div>

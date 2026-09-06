@@ -6,9 +6,11 @@
    * Why: Gives Jonas a concrete, live, interactive UI playground to test and demonstrate every single Rune and architectural pattern.
    */
 
+  import { onMount, untrack } from "svelte";
+  import { spatialStore } from "../services/spatialStore.svelte";
   import BindableSearchInput from "./BindableSearchInput.svelte";
   import PlaygroundCard from "./PlaygroundCard.svelte";
-  import { spatialStore } from "../services/spatialStore.svelte";
+
 
   // Active filter tab for the playground
   let selectedCategory = $state<"all" | "runes" | "templates" | "architecture">("all");
@@ -28,19 +30,47 @@
     userProfile.active = !userProfile.active; // Direct mutation intercepted by ES Proxy
   };
 
-  const code1Svelte = `// Svelte 5 ($state with ES Proxy)
-let count = $state(0);
-let user = $state({ name: "Jonas", active: true });
+  const code1Svelte =
+    `<` +
+    `script lang="ts">\n` +
+    `  // Svelte 5: Component state with ES6 Proxies\n` +
+    `  let count = $state(0);\n` +
+    `  let user = $state({ name: "Jonas", role: "Architect", active: true });\n\n` +
+    `  const increment = () => count++;\n` +
+    `  const toggleStatus = () => {\n` +
+    `    // Direct mutation intercepted by Svelte Proxy\n` +
+    `    user.active = !user.active;\n` +
+    `  };\n` +
+    `<` +
+    `/script>\n\n` +
+    `<div class="user-card">\n` +
+    `  <h3>{user.name} ({user.role})</h3>\n` +
+    `  <p>Status: {user.active ? "Active" : "Inactive"}</p>\n` +
+    `  <button onclick={increment}>Count: {count}</button>\n` +
+    `  <button onclick={toggleStatus}>Toggle Status</button>\n` +
+    `</div>`;
 
-const increment = () => count++;
-const toggle = () => user.active = !user.active;`;
+  const code1React = `import React, { useState } from "react";
 
-  const code1React = `// React 19 (useState)
-const [count, setCount] = useState(0);
-const [user, setUser] = useState({ name: "Jonas", active: true });
+export const UserCard: React.FC = () => {
+  const [count, setCount] = useState(0);
+  const [user, setUser] = useState({ name: "Jonas", role: "Architect", active: true });
 
-const increment = () => setCount(c => c + 1);
-const toggle = () => setUser(u => ({ ...u, active: !u.active }));`;
+  const increment = () => setCount((prev) => prev + 1);
+  const toggleStatus = () => {
+    // Immutable shallow clone required
+    setUser((prev) => ({ ...prev, active: !prev.active }));
+  };
+
+  return (
+    <div className="user-card">
+      <h3>{user.name} ({user.role})</h3>
+      <p>Status: {user.active ? "Active" : "Inactive"}</p>
+      <button onClick={increment}>Count: {count}</button>
+      <button onClick={toggleStatus}>Toggle Status</button>
+    </div>
+  );
+};`;
 
   // ==========================================
   // Concept 1b: bind:this / DOM Reference
@@ -57,23 +87,44 @@ const toggle = () => setUser(u => ({ ...u, active: !u.active }));`;
     }
   };
 
-  const code1bSvelte = `// Svelte 5 (bind:this)
-let mapDiv: HTMLDivElement | null = $state(null);
+  const code1bSvelte =
+    `<` +
+    `script lang="ts">\n` +
+    `  // Svelte 5: Direct DOM node attachment with bind:this\n` +
+    `  let mapDiv = $state<HTMLDivElement | null>(null);\n` +
+    `  let dimensions = $state({ width: 0, height: 0 });\n\n` +
+    `  $effect(() => {\n` +
+    `    if (mapDiv) {\n` +
+    `      dimensions = { width: mapDiv.clientWidth, height: mapDiv.clientHeight };\n` +
+    `      console.log("Attached map canvas container:", dimensions);\n` +
+    `    }\n` +
+    `  });\n` +
+    `<` +
+    `/script>\n\n` +
+    `<div bind:this={mapDiv} class="map-viewport">\n` +
+    `  <p>Viewport: {dimensions.width}px × {dimensions.height}px</p>\n` +
+    `</div>`;
 
-$effect(() => {
-  if (mapDiv) console.log(mapDiv.clientWidth);
-});
+  const code1bReact = `import React, { useRef, useEffect, useState } from "react";
 
-<div bind:this={mapDiv} class="map-viewport"></div>`;
+export const MapViewport: React.FC = () => {
+  const mapDivRef = useRef<HTMLDivElement>(null);
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
-  const code1bReact = `// React 19 (useRef)
-const mapDivRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (mapDivRef.current) {
+      const { clientWidth, clientHeight } = mapDivRef.current;
+      setDimensions({ width: clientWidth, height: clientHeight });
+      console.log("Attached map canvas container:", { clientWidth, clientHeight });
+    }
+  }, []);
 
-useEffect(() => {
-  if (mapDivRef.current) console.log(mapDivRef.current.clientWidth);
-}, []);
-
-<div ref={mapDivRef} className="map-viewport" />`;
+  return (
+    <div ref={mapDivRef} className="map-viewport">
+      <p>Viewport: {dimensions.width}px × {dimensions.height}px</p>
+    </div>
+  );
+};`;
 
   // ==========================================
   // Concept 2: $derived() Single Expression Computed
@@ -81,13 +132,45 @@ useEffect(() => {
   const doubleCount = $derived(counter * 2);
   const zoomResolution = $derived((156543.03392 / Math.pow(2, counter)).toFixed(2));
 
-  const code2Svelte = `// Svelte 5 ($derived auto-tracked)
-let count = $state(5);
-let doubled = $derived(count * 2);`;
+  const code2Svelte =
+    `<` +
+    `script lang="ts">\n` +
+    `  // Svelte 5: Auto-tracked computed derivation with zero dependency array\n` +
+    `  let zoomLevel = $state(7);\n` +
+    `  let metersPerPixel = $derived((156543.03392 / Math.pow(2, zoomLevel)).toFixed(2));\n` +
+    `  let isDetailedView = $derived(zoomLevel >= 12);\n` +
+    `<` +
+    `/script>\n\n` +
+    `<div class="zoom-panel">\n` +
+    `  <p>Current Zoom: {zoomLevel}</p>\n` +
+    `  <p>Resolution: {metersPerPixel} m/px</p>\n` +
+    `  {#if isDetailedView}\n` +
+    `    <span>Rendering high-resolution cadastral parcels</span>\n` +
+    `  {/if}\n` +
+    `  <button onclick={() => zoomLevel++}>+ Zoom In</button>\n` +
+    `</div>`;
 
-  const code2React = `// React 19 (useMemo with explicit [deps])
-const [count, setCount] = useState(5);
-const doubled = useMemo(() => count * 2, [count]);`;
+  const code2React = `import React, { useState, useMemo } from "react";
+
+export const ZoomPanel: React.FC = () => {
+  const [zoomLevel, setZoomLevel] = useState(7);
+
+  // Manual dependency array required to prevent stale closures
+  const metersPerPixel = useMemo(() => {
+    return (156543.03392 / Math.pow(2, zoomLevel)).toFixed(2);
+  }, [zoomLevel]);
+
+  const isDetailedView = useMemo(() => zoomLevel >= 12, [zoomLevel]);
+
+  return (
+    <div className="zoom-panel">
+      <p>Current Zoom: {zoomLevel}</p>
+      <p>Resolution: {metersPerPixel} m/px</p>
+      {isDetailedView && <span>Rendering high-resolution cadastral parcels</span>}
+      <button onClick={() => setZoomLevel((z) => z + 1)}>+ Zoom In</button>
+    </div>
+  );
+};`;
 
   // ==========================================
   // Concept 3: $derived.by() Multi-line Computed Block
@@ -113,17 +196,53 @@ const doubled = useMemo(() => count * 2, [count]);`;
     };
   });
 
-  const code3Svelte = `// Svelte 5 ($derived.by multi-line closure)
-let summary = $derived.by(() => {
-  let active = layers.filter(l => l.visible);
-  return { count: active.length, totalMb: sum(active) };
-});`;
+  const code3Svelte =
+    `<` +
+    `script lang="ts">\n` +
+    `  // Svelte 5: Complex multi-line computed closure\n` +
+    `  let filterText = $state("");\n` +
+    `  let layers = $state([\n` +
+    `    { id: "matrikel", name: "Matrikelkortet", sizeMb: 85.6, visible: true },\n` +
+    `    { id: "ortofoto", name: "Ortofoto Forår", sizeMb: 320.0, visible: false },\n` +
+    `    { id: "dhm", name: "Højdemodel DHM", sizeMb: 140.5, visible: true }\n` +
+    `  ]);\n\n` +
+    `  let summary = $derived.by(() => {\n` +
+    `    const q = filterText.toLowerCase().trim();\n` +
+    `    const matched = layers.filter((l) => l.name.toLowerCase().includes(q));\n` +
+    `    const active = matched.filter((l) => l.visible);\n` +
+    `    const totalMb = active.reduce((acc, l) => acc + l.sizeMb, 0);\n` +
+    `    return { count: active.length, totalMb: totalMb.toFixed(1) };\n` +
+    `  });\n` +
+    `<` +
+    `/script>\n\n` +
+    `<input bind:value={filterText} placeholder="Filter spatial layers..." />\n` +
+    `<p>Active: {summary.count} layers | Total: {summary.totalMb} MB</p>`;
 
-  const code3React = `// React 19 (useMemo multi-line block)
-const summary = useMemo(() => {
-  let active = layers.filter(l => l.visible);
-  return { count: active.length, totalMb: sum(active) };
-}, [layers]);`;
+  const code3React = `import React, { useState, useMemo } from "react";
+
+export const LayerSummary: React.FC = () => {
+  const [filterText, setFilterText] = useState("");
+  const [layers, setLayers] = useState([
+    { id: "matrikel", name: "Matrikelkortet", sizeMb: 85.6, visible: true },
+    { id: "ortofoto", name: "Ortofoto Forår", sizeMb: 320.0, visible: false },
+    { id: "dhm", name: "Højdemodel DHM", sizeMb: 140.5, visible: true }
+  ]);
+
+  const summary = useMemo(() => {
+    const q = filterText.toLowerCase().trim();
+    const matched = layers.filter((l) => l.name.toLowerCase().includes(q));
+    const active = matched.filter((l) => l.visible);
+    const totalMb = active.reduce((acc, l) => acc + l.sizeMb, 0);
+    return { count: active.length, totalMb: totalMb.toFixed(1) };
+  }, [layers, filterText]);
+
+  return (
+    <div>
+      <input value={filterText} onChange={(e) => setFilterText(e.target.value)} placeholder="Filter..." />
+      <p>Active: {summary.count} layers | Total: {summary.totalMb} MB</p>
+    </div>
+  );
+};`;
 
   // ==========================================
   // Concept 4: $effect() Microtask Side Effect with Cleanup
@@ -135,86 +254,231 @@ const summary = useMemo(() => {
   $effect(() => {
     if (!isHeartbeatRunning) return;
 
-    effectLog = [...effectLog.slice(-4), `[${new Date().toLocaleTimeString()}] Timer started (1000ms)`];
+    // Use untrack so reading and writing effectLog does not create a cyclic reactive loop
+    untrack(() => {
+      effectLog = [...effectLog.slice(-4), `[${new Date().toLocaleTimeString()}] Timer started (1000ms)`];
+    });
+
     const timer = setInterval(() => {
       heartbeatTicks += 1;
     }, 1000);
 
     return () => {
-      effectLog = [...effectLog.slice(-4), `[${new Date().toLocaleTimeString()}] Cleanup: timer cleared`];
+      untrack(() => {
+        effectLog = [...effectLog.slice(-4), `[${new Date().toLocaleTimeString()}] Cleanup: timer cleared`];
+      });
       clearInterval(timer);
     };
   });
 
-  const code4Svelte = `// Svelte 5 ($effect with automatic teardown)
-$effect(() => {
-  const timer = setInterval(tick, 1000);
-  return () => clearInterval(timer);
-});`;
+  const code4Svelte =
+    `<` +
+    `script lang="ts">\n` +
+    `  // Svelte 5: Microtask side effect with automatic teardown\n` +
+    `  let isRunning = $state(false);\n` +
+    `  let ticks = $state(0);\n\n` +
+    `  $effect(() => {\n` +
+    `    if (!isRunning) return;\n\n` +
+    `    console.log("Starting telemetry polling interval...");\n` +
+    `    const timer = setInterval(() => {\n` +
+    `      ticks += 1;\n` +
+    `    }, 1000);\n\n` +
+    `    // Automatic cleanup returned function\n` +
+    `    return () => {\n` +
+    `      console.log("Tearing down interval timer");\n` +
+    `      clearInterval(timer);\n` +
+    `    };\n` +
+    `  });\n` +
+    `<` +
+    `/script>\n\n` +
+    `<button onclick={() => (isRunning = !isRunning)}>\n` +
+    `  {isRunning ? "Stop Polling" : "Start Polling"}\n` +
+    `</button>\n` +
+    `<span>Heartbeat Ticks: {ticks}</span>`;
 
-  const code4React = `// React 19 (useEffect with cleanup)
-useEffect(() => {
-  const timer = setInterval(tick, 1000);
-  return () => clearInterval(timer);
-}, [intervalMs]);`;
+  const code4React = `import React, { useState, useEffect } from "react";
+
+export const HeartbeatPoller: React.FC = () => {
+  const [isRunning, setIsRunning] = useState(false);
+  const [ticks, setTicks] = useState(0);
+
+  useEffect(() => {
+    if (!isRunning) return;
+
+    console.log("Starting telemetry polling interval...");
+    const timer = setInterval(() => {
+      setTicks((t) => t + 1);
+    }, 1000);
+
+    // Teardown cleanup function
+    return () => {
+      console.log("Tearing down interval timer");
+      clearInterval(timer);
+    };
+  }, [isRunning]);
+
+  return (
+    <div>
+      <button onClick={() => setIsRunning((r) => !r)}>
+        {isRunning ? "Stop Polling" : "Start Polling"}
+      </button>
+      <span>Heartbeat Ticks: {ticks}</span>
+    </div>
+  );
+};`;
 
   // ==========================================
   // Concept 5: $props() & $bindable()
   // ==========================================
   let bindableSearchText = $state("Matrikel");
 
-  const code5Svelte = `// Svelte 5 ($props & $bindable)
-// Child.svelte
-let { query = $bindable(""), placeholder }: Props = $props();
-<input bind:value={query} {placeholder} />
+  const code5Svelte =
+    `<!-- Child.svelte -->\n` +
+    `<` +
+    `script lang="ts">\n` +
+    `  interface Props {\n` +
+    `    searchQuery?: string;\n` +
+    `    placeholder?: string;\n` +
+    `  }\n` +
+    `  let { searchQuery = $bindable(""), placeholder = "Search..." }: Props = $props();\n` +
+    `<` +
+    `/script>\n\n` +
+    `<input bind:value={searchQuery} {placeholder} />\n\n` +
+    `<!-- Parent.svelte -->\n` +
+    `<` +
+    `script lang="ts">\n` +
+    `  import Child from "./Child.svelte";\n` +
+    `  let activeQuery = $state("Matrikel");\n` +
+    `<` +
+    `/script>\n\n` +
+    `<Child bind:searchQuery={activeQuery} />\n` +
+    `<p>Parent Query: {activeQuery}</p>`;
 
-// Parent.svelte
-<Child bind:query={searchText} />`;
+  const code5React = `import React, { useState } from "react";
 
-  const code5React = `// React 19 (Props + onChange handler)
 // Child.tsx
-const Child = ({ query, onChange, placeholder }: Props) => (
-  <input value={query} onChange={e => onChange(e.target.value)} placeholder={placeholder} />
+interface ChildProps {
+  searchQuery: string;
+  onSearchChange: (value: string) => void;
+  placeholder?: string;
+}
+
+export const Child: React.FC<ChildProps> = ({ searchQuery, onSearchChange, placeholder = "Search..." }) => (
+  <input value={searchQuery} onChange={(e) => onSearchChange(e.target.value)} placeholder={placeholder} />
 );
 
 // Parent.tsx
-<Child query={searchText} onChange={setSearchText} />`;
+export const Parent: React.FC = () => {
+  const [activeQuery, setActiveQuery] = useState("Matrikel");
+
+  return (
+    <div>
+      <Child searchQuery={activeQuery} onSearchChange={setActiveQuery} />
+      <p>Parent Query: {activeQuery}</p>
+    </div>
+  );
+};`;
 
   // ==========================================
   // Concept 6: {#snippet} and {@render}
   // ==========================================
-  const code6Svelte = `// Svelte 5 ({#snippet} & {@render})
-{#snippet layerBadge(name: string, size: number)}
-  <span class="badge">{name} ({size} MB)</span>
-{/snippet}
+  const code6Svelte =
+    `<` +
+    `script lang="ts">\n` +
+    `  // Svelte 5: First-class reusable parameterized template snippet\n` +
+    `  let layers = $state([\n` +
+    `    { id: "wfs-cadastre", name: "Cadastre WFS", sizeMb: 85.6 },\n` +
+    `    { id: "wms-radar", name: "DMI Radar", sizeMb: 12.4 }\n` +
+    `  ]);\n` +
+    `<` +
+    `/script>\n\n` +
+    `{#snippet layerCard(name: string, size: number)}\n` +
+    `  <div class="layer-badge">\n` +
+    `    <strong>{name}</strong>\n` +
+    `    <span>({size} MB)</span>\n` +
+    `  </div>\n` +
+    `{/snippet}\n\n` +
+    `<div class="layer-list">\n` +
+    `  {#each layers as layer (layer.id)}\n` +
+    `    {@render layerCard(layer.name, layer.sizeMb)}\n` +
+    `  {/each}\n` +
+    `</div>`;
 
-{@render layerBadge("Matrikel", 85.6)}`;
+  const code6React = `import React, { useState } from "react";
 
-  const code6React = `// React 19 (JSX Render Prop / Helper)
-const renderLayerBadge = (name: string, size: number) => (
-  <span className="badge">{name} ({size} MB)</span>
-);
+export const LayerList: React.FC = () => {
+  const [layers] = useState([
+    { id: "wfs-cadastre", name: "Cadastre WFS", sizeMb: 85.6 },
+    { id: "wms-radar", name: "DMI Radar", sizeMb: 12.4 }
+  ]);
 
-{renderLayerBadge("Matrikel", 85.6)}`;
+  // Render helper function / prop
+  const renderLayerCard = (name: string, size: number) => (
+    <div className="layer-badge" key={name}>
+      <strong>{name}</strong>
+      <span>({size} MB)</span>
+    </div>
+  );
+
+  return (
+    <div className="layer-list">
+      {layers.map((l) => renderLayerCard(l.name, l.sizeMb))}
+    </div>
+  );
+};`;
 
   // ==========================================
   // Concept 7: Standalone .svelte.ts Store vs Redux/Zustand
   // ==========================================
-  const code7Svelte = `// Svelte 5 (Pure TypeScript class in store.svelte.ts)
-class SpatialStore {
-  activeLayer = $state("Kommuneplan");
-  zoom = $state(12);
-  label = $derived(\`\${this.activeLayer} (Zoom: \${this.zoom})\`);
-}
-export const spatialStore = new SpatialStore();`;
+  const code7Svelte =
+    `// spatialStore.svelte.ts\n` +
+    `class SpatialStore {\n` +
+    `  activeLayer = $state("Kommuneplan");\n` +
+    `  zoom = $state(7);\n` +
+    `  formatted = $derived(\`\${this.activeLayer} (Zoom: \${this.zoom})\`);\n\n` +
+    `  toggle(name: string) {\n` +
+    `    this.activeLayer = name;\n` +
+    `  }\n` +
+    `}\n` +
+    `export const spatialStore = new SpatialStore();\n\n` +
+    `<!-- Consumer.svelte -->\n` +
+    `<` +
+    `script lang="ts">\n` +
+    `  import { spatialStore } from "./spatialStore.svelte";\n` +
+    `<` +
+    `/script>\n\n` +
+    `<p>Active: {spatialStore.formatted}</p>\n` +
+    `<button onclick={() => spatialStore.toggle("Matrikelkort")}>Switch Layer</button>`;
 
-  const code7React = `// React + Zustand (External store library)
+  const code7React = `// useSpatialStore.ts (Zustand store)
+import { create } from "zustand";
+
+interface State {
+  activeLayer: string;
+  zoom: number;
+  toggle: (name: string) => void;
+}
+
 export const useSpatialStore = create<State>((set) => ({
   activeLayer: "Kommuneplan",
-  zoom: 12,
-  setActiveLayer: (l) => set({ activeLayer: l }),
-  setZoom: (z) => set({ zoom: z }),
-}));`;
+  zoom: 7,
+  toggle: (name) => set({ activeLayer: name })
+}));
+
+// Consumer.tsx
+import React from "react";
+import { useSpatialStore } from "./useSpatialStore";
+
+export const Consumer: React.FC = () => {
+  const { activeLayer, zoom, toggle } = useSpatialStore();
+
+  return (
+    <div>
+      <p>Active: {activeLayer} (Zoom: {zoom})</p>
+      <button onClick={() => toggle("Matrikelkort")}>Switch Layer</button>
+    </div>
+  );
+};`;
 
   // ==========================================
   // Concept 8: Simulated SvelteKit Server Loader
@@ -241,24 +505,48 @@ export const useSpatialStore = create<State>((set) => ({
     isLoadingServerData = false;
   };
 
-  $effect(() => {
+  onMount(() => {
     simulateServerLoad("matrikel");
   });
 
-  const code8Svelte = `// SvelteKit (+page.server.ts & +page.svelte)
-// +page.server.ts (Runs securely in Node.js)
-export const load: PageServerLoad = async ({ fetch }) => ({
-  layer: await (await fetch('/api/layer')).json()
-});
+  const code8Svelte =
+    `<!-- src/routes/layers/[id]/+page.server.ts -->\n` +
+    `import type { PageServerLoad } from './$types';\n` +
+    `import { env } from '$` +
+    `env/dynamic/private';\n\n` +
+    `export const load: PageServerLoad = async ({ params, fetch }) => {\n` +
+    `  const res = await fetch(\`https://services.datafordeler.dk/WMS?token=\${env.SECRET_TOKEN}\`);\n` +
+    `  return {\n` +
+    `    layer: await res.json(),\n` +
+    `    region: 'Danmark'\n` +
+    `  };\n` +
+    `};\n\n` +
+    `<!-- src/routes/layers/[id]/+page.svelte -->\n` +
+    `<` +
+    `script lang="ts">\n` +
+    `  import type { PageData } from './$types';\n` +
+    `  let { data }: { data: PageData } = $props();\n` +
+    `<` +
+    `/script>\n\n` +
+    `<h1>{data.layer.name} ({data.region})</h1>`;
 
-// +page.svelte (Hydrates client component)
-let { data }: { data: PageData } = $props();`;
+  const code8React = `// app/layers/[id]/page.tsx (Next.js Server Component)
+import React from "react";
 
-  const code8React = `// Next.js (Server Component / getServerSideProps)
-// app/layer/[id]/page.tsx
-export default async function LayerPage({ params }) {
-  const layer = await fetchLayer(params.id);
-  return <div>{layer.title}</div>;
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
+
+export default async function LayerPage({ params }: PageProps) {
+  const { id } = await params;
+  const res = await fetch(\`https://services.datafordeler.dk/WMS?token=\${process.env.SECRET_TOKEN}\`);
+  const layer = await res.json();
+
+  return (
+    <div>
+      <h1>{layer.name} (Danmark)</h1>
+    </div>
+  );
 }`;
 
   // ==========================================
@@ -267,26 +555,37 @@ export default async function LayerPage({ params }) {
   let currentNestedPath = $state<"/layers/settings" | "/layers/preview" | "/layers/metadata">("/layers/settings");
 
   const code10Svelte =
-    `// SvelteKit (+layout.svelte)\n` +
+    `<!-- src/routes/+layout.svelte -->\n` +
     `<` +
     `script lang="ts">\n` +
     `  import type { Snippet } from 'svelte';\n` +
     `  let { children }: { children: Snippet } = $props();\n` +
     `<` +
     `/script>\n\n` +
-    `<nav class="shell-nav">Dataforsyningen.dk</nav>\n` +
-    `<main>{@render children()}</main>`;
+    `<header class="app-header">\n` +
+    `  <nav>Dataforsyningen.dk / Spatial Portal</nav>\n` +
+    `</header>\n` +
+    `<main class="main-content">\n` +
+    `  {@render children()}\n` +
+    `</main>`;
 
-  const code10React =
-    `// Next.js (app/layout.tsx)\n` +
-    `export default function RootLayout({ children }: { children: React.ReactNode }) {\n` +
-    `  return (\n` +
-    `    <div>\n` +
-    `      <nav className="shell-nav">Dataforsyningen.dk</nav>\n` +
-    `      <main>{children}</main>\n` +
-    `    </div>\n` +
-    `  );\n` +
-    `}`;
+  const code10React = `// app/layout.tsx (Next.js Root Layout)
+import React from "react";
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="da">
+      <body>
+        <header className="app-header">
+          <nav>Dataforsyningen.dk / Spatial Portal</nav>
+        </header>
+        <main className="main-content">
+          {children}
+        </main>
+      </body>
+    </html>
+  );
+}`;
 </script>
 
 <!-- Snippet Definition 1: Badge Chip -->

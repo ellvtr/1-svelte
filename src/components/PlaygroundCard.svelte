@@ -1,12 +1,16 @@
 <script lang="ts">
   /**
    * Interactive Playground Card for Rosetta Stone Demos.
-   * What: Encapsulates interactive demo widgets alongside toggleable side-by-side Svelte 5 and React/Next.js code viewers.
+   * What: Encapsulates interactive demo widgets alongside toggleable side-by-side Svelte 5 and React/Next.js code viewers with syntax highlighting.
    * When: Invoked per concept card in RunesLivePlayground to render concepts #1 through #10.
    * Why: Enables side-by-side comparative inspection between Svelte 5 signal compilation and React VDOM patterns.
    */
 
   import type { Snippet } from "svelte";
+  import Prism from "prismjs";
+  import "prismjs/components/prism-typescript";
+  import "prismjs/components/prism-jsx";
+  import "prismjs/components/prism-tsx";
 
   /**
    * Properties contract for PlaygroundCard.
@@ -32,6 +36,16 @@
 
   // Active view switcher state (interactive demo vs Svelte 5 code vs React code)
   let activeView = $state<"demo" | "svelte" | "react">("demo");
+
+  // Syntax highlighted Svelte 5 snippet derivation
+  const highlightedSvelte = $derived(
+    Prism.highlight(svelteCode, Prism.languages.tsx || Prism.languages.typescript, "tsx")
+  );
+
+  // Syntax highlighted React 19 snippet derivation
+  const highlightedReact = $derived(
+    Prism.highlight(reactCode, Prism.languages.tsx || Prism.languages.typescript, "tsx")
+  );
 </script>
 
 <div class="demo-card">
@@ -77,12 +91,14 @@
     {:else if activeView === "svelte"}
       <div class="code-view svelte-theme">
         <div class="code-badge">Svelte 5 Implementation</div>
-        <pre><code>{svelteCode}</code></pre>
+        <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+        <pre><code class="language-tsx">{@html highlightedSvelte}</code></pre>
       </div>
     {:else}
       <div class="code-view react-theme">
         <div class="code-badge">React / Next.js Implementation</div>
-        <pre><code>{reactCode}</code></pre>
+        <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+        <pre><code class="language-tsx">{@html highlightedReact}</code></pre>
       </div>
     {/if}
   </div>

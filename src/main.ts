@@ -6,6 +6,7 @@
  */
 
 import { mount } from "svelte";
+import "prismjs/themes/prism-tomorrow.css";
 import App from "./App.svelte";
 
 // Locate mounting DOM container
