@@ -9,11 +9,12 @@
   import type { SvelteKitPatternInfo } from "../types/spatial";
 
   // Svelte 5 state for active pattern selection
-  let selectedPatternId = $state<string>("page-server");
+  let selectedPatternId = $state<string>("page-server-loader");
 
   // Pattern catalogue data with safe non-bundled snippet strings
   const patterns: SvelteKitPatternInfo[] = [
     {
+      id: "page-server-loader",
       name: "Server-Only Loader (+page.server.ts)",
       filename: "src/routes/spatial-portal/+page.server.ts",
       scope: "Server",
@@ -42,6 +43,7 @@ export const load: PageServerLoad = async ({ fetch, depends }) => {
 };`,
     },
     {
+      id: "page-universal-loader",
       name: "Universal Loader (+page.ts)",
       filename: "src/routes/spatial-portal/+page.ts",
       scope: "Universal",
@@ -64,6 +66,7 @@ export const load: PageLoad = async ({ fetch, data }) => {
 };`,
     },
     {
+      id: "page-server-action",
       name: "Server Action (+page.server.ts)",
       filename: "src/routes/spatial-portal/+page.server.ts",
       scope: "Server",
@@ -92,6 +95,7 @@ export const actions: Actions = {
 };`,
     },
     {
+      id: "page-svelte-component",
       name: "Svelte 5 Page Component (+page.svelte)",
       filename: "src/routes/spatial-portal/+page.svelte",
       scope: "Client",
@@ -122,17 +126,17 @@ export const actions: Actions = {
 
   // Derived selected pattern
   const activePattern = $derived(
-    patterns.find((p) => p.filename.includes(selectedPatternId)) ?? patterns[0],
+    patterns.find((p) => p.id === selectedPatternId) ?? patterns[0],
   );
 </script>
 
 <div class="architecture-layout">
   <div class="pattern-nav">
-    {#each patterns as pattern (pattern.filename)}
+    {#each patterns as pattern (pattern.id)}
       <button
         class="pattern-tab"
-        class:selected={activePattern.filename === pattern.filename}
-        onclick={() => (selectedPatternId = pattern.filename.split("/").pop() ?? "page-server")}
+        class:selected={activePattern.id === pattern.id}
+        onclick={() => (selectedPatternId = pattern.id)}
       >
         <div class="tab-header">
           <span class="scope-tag {pattern.scope.toLowerCase()}">{pattern.scope}</span>

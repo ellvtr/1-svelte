@@ -91,48 +91,90 @@
         <table class="comparison-table">
           <thead>
             <tr>
-              <th>Capability</th>
-              <th>Svelte 5 (Runes)</th>
-              <th>Svelte 4 (Legacy)</th>
-              <th>React 19</th>
+              <th style="width: 48px; text-align: center;">#</th>
+              <th>Concept / Capability</th>
+              <th>Svelte 5 (Runes) & SvelteKit</th>
+              <th>React / Next.js</th>
+              <th>Key Technical & Mental Difference</th>
             </tr>
           </thead>
           <tbody>
             <tr>
+              <td style="text-align: center;"><span class="concept-badge">1</span></td>
               <td><strong>Reactive State</strong></td>
-              <td><code>let val = $state(0);</code></td>
-              <td><code>let val = 0;</code></td>
-              <td><code>useState(0)</code></td>
+              <td><code>let count = $state(0);</code></td>
+              <td><code>const [count, setCount] = useState(0);</code></td>
+              <td>Zero setter boilerplate. Mutate directly (<code>count++</code>). Proxies objects/arrays.</td>
             </tr>
             <tr>
+              <td style="text-align: center;"><span class="concept-badge">1b</span></td>
+              <td><strong>DOM Ref / Mutable Raw</strong></td>
+              <td><code>bind:this=&#123;el&#125;</code> / <code>$state.raw()</code></td>
+              <td><code>const elRef = useRef(null);</code></td>
+              <td>Direct DOM node binding without <code>ref.current</code> boilerplate.</td>
+            </tr>
+            <tr>
+              <td style="text-align: center;"><span class="concept-badge">2</span></td>
               <td><strong>Computed State</strong></td>
-              <td><code>let d = $derived(val * 2);</code></td>
-              <td><code>$: d = val * 2;</code></td>
-              <td><code>useMemo(...)</code></td>
+              <td><code>let double = $derived(count * 2);</code></td>
+              <td><code>useMemo(() =&gt; count * 2, [count])</code></td>
+              <td>Auto-tracked dependencies. No manual dependency array risking stale closures.</td>
             </tr>
             <tr>
-              <td><strong>Component Props</strong></td>
-              <td><code>let &#123; title &#125; = $props();</code></td>
-              <td><code>export let title;</code></td>
-              <td><code>props.title</code></td>
+              <td style="text-align: center;"><span class="concept-badge">3</span></td>
+              <td><strong>Multi-line Computed</strong></td>
+              <td><code>let sum = $derived.by(() =&gt; &#123; ... &#125;)</code></td>
+              <td><code>useMemo(() =&gt; &#123; ... &#125;, [deps])</code></td>
+              <td>For complex logic containing loops, conditions, or multi-step aggregations.</td>
             </tr>
             <tr>
-              <td><strong>Side Effects</strong></td>
-              <td><code>$effect(() =&gt; ...);</code></td>
-              <td><code>$: ...</code></td>
-              <td><code>useEffect(...)</code></td>
+              <td style="text-align: center;"><span class="concept-badge">4</span></td>
+              <td><strong>Side Effects & Lifecycle</strong></td>
+              <td><code>$effect(() =&gt; &#123; ... return () =&gt; clean(); &#125;);</code></td>
+              <td><code>useEffect(() =&gt; &#123; ... return () =&gt; clean(); &#125;, [deps]);</code></td>
+              <td>Auto-tracks runtime signal reads. Batches updates into microtasks before paint.</td>
             </tr>
             <tr>
-              <td><strong>Global / Universal State</strong></td>
-              <td><code>.svelte.ts</code> files (native)</td>
-              <td><code>writable()</code> stores</td>
-              <td>Context / Zustand / Redux</td>
+              <td style="text-align: center;"><span class="concept-badge">5</span></td>
+              <td><strong>Props & Two-Way Binding</strong></td>
+              <td><code>let &#123; val = $bindable() &#125; = $props();</code></td>
+              <td><code>const &#123; val, onChange &#125; = props;</code></td>
+              <td>Type-safe props with <code>$bindable()</code> for optional clean two-way synchronization.</td>
             </tr>
             <tr>
-              <td><strong>DOM Event Syntax</strong></td>
-              <td><code>onclick=&#123;...&#125;</code></td>
-              <td><code>on:click=&#123;...&#125;</code></td>
-              <td><code>onClick=&#123;...&#125;</code></td>
+              <td style="text-align: center;"><span class="concept-badge">6</span></td>
+              <td><strong>Render Props / Snippets</strong></td>
+              <td><code>&#123;#snippet item(data)&#125;</code> + <code>&#123;@render item(data)&#125;</code></td>
+              <td><code>renderItem=&#123;(data) =&gt; &lt;div&gt;...&lt;/div&gt;&#125;</code></td>
+              <td>Type-safe parameterized template closures replacing legacy <code>&lt;slot /&gt;</code>.</td>
+            </tr>
+            <tr>
+              <td style="text-align: center;"><span class="concept-badge">7</span></td>
+              <td><strong>Global Shared Store</strong></td>
+              <td>Standalone <code>.svelte.ts</code> class with <code>$state</code></td>
+              <td>Redux / Zustand / React Context</td>
+              <td>Zero provider wrapper hell. Works in pure TypeScript modules without React tree context.</td>
+            </tr>
+            <tr>
+              <td style="text-align: center;"><span class="concept-badge">8</span></td>
+              <td><strong>Server Data Loading</strong></td>
+              <td><code>+page.server.ts</code> <code>export const load</code></td>
+              <td><code>getServerSideProps</code> / Server Components</td>
+              <td>Runs strictly on server (Node.js/Bun). Secrets never leak to client bundle.</td>
+            </tr>
+            <tr>
+              <td style="text-align: center;"><span class="concept-badge">9</span></td>
+              <td><strong>Page Component</strong></td>
+              <td><code>+page.svelte</code> (<code>let &#123; data &#125; = $props()</code>)</td>
+              <td><code>export default function Page(&#123; data &#125;)</code></td>
+              <td>Client UI component immediately hydrated with typed server <code>PageData</code>.</td>
+            </tr>
+            <tr>
+              <td style="text-align: center;"><span class="concept-badge">10</span></td>
+              <td><strong>Nested Layouts</strong></td>
+              <td><code>+layout.svelte</code> (<code>&#123;@render children()&#125;</code>)</td>
+              <td><code>app/layout.tsx</code> (<code>&#123;children&#125;</code>)</td>
+              <td>Persistent UI shell; only active nested sub-routes re-render during navigation.</td>
             </tr>
           </tbody>
         </table>
@@ -317,6 +359,16 @@
     border-radius: 3px;
     font-family: monospace;
     font-size: 0.8rem;
+  }
+
+  .concept-badge {
+    background: #0284c7;
+    color: #f8fafc;
+    font-weight: 700;
+    font-size: 0.75rem;
+    padding: 2px 7px;
+    border-radius: 4px;
+    display: inline-block;
   }
 
   .telemetry-grid {
