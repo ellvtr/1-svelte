@@ -7,6 +7,7 @@
 
 import http from "node:http";
 
+// Chrome target metadata definition
 type CdpTarget = {
   id: string;
   title: string;
@@ -15,8 +16,12 @@ type CdpTarget = {
   webSocketDebuggerUrl?: string;
 };
 
+/**
+ * Fetches the active page targets from Chrome CDP HTTP endpoint.
+ */
 const getPageTargets = (): Promise<CdpTarget[]> => {
   return new Promise((resolve, reject) => {
+    // Query Chrome JSON target discovery endpoint
     http.get("http://localhost:9222/json", (res) => {
       let data = "";
       res.on("data", (chunk) => (data += chunk));
@@ -26,16 +31,24 @@ const getPageTargets = (): Promise<CdpTarget[]> => {
   });
 };
 
+/**
+ * Main multi-layer toggle testing routine.
+ */
 export const main = async (): Promise<void> => {
+  // Step 1: Discover running page target on Vite port 5173
   const targets = await getPageTargets();
   const pageTarget = targets.find((t) => t.type === "page" && t.url.includes("5173"));
   if (!pageTarget || !pageTarget.webSocketDebuggerUrl) return;
 
+  // Step 2: Open WebSocket connection to CDP target
   const ws = new WebSocket(pageTarget.webSocketDebuggerUrl);
 
+  // Step 3: Trigger multi-toggle click events and inspect DOM state
   ws.onopen = () => {
+    // Enable Runtime domain
     ws.send(JSON.stringify({ id: 1, method: "Runtime.enable" }));
 
+    // Define JS expression that clicks every layer toggle button and collects DOM results
     const expression = `(() => {
       const btns = document.querySelectorAll('.toggle-switch');
       btns.forEach(b => (b as HTMLElement).click());
@@ -53,6 +66,7 @@ export const main = async (): Promise<void> => {
       };
     })()`;
 
+    // Send evaluate command to browser
     ws.send(
       JSON.stringify({
         id: 2,
@@ -62,6 +76,7 @@ export const main = async (): Promise<void> => {
     );
   };
 
+  // Step 4: Handle response message and output test results
   ws.onmessage = (event) => {
     const msg = JSON.parse(event.data.toString());
     if (msg.id === 2) {
@@ -75,4 +90,6 @@ export const main = async (): Promise<void> => {
   };
 };
 
+// Execute script
 main();
+

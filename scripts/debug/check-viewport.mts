@@ -7,6 +7,7 @@
 
 import http from "node:http";
 
+// Chrome target metadata definition
 type CdpTarget = {
   id: string;
   title: string;
@@ -15,8 +16,12 @@ type CdpTarget = {
   webSocketDebuggerUrl?: string;
 };
 
+/**
+ * Fetches the active page targets from Chrome CDP HTTP endpoint.
+ */
 const getPageTargets = (): Promise<CdpTarget[]> => {
   return new Promise((resolve, reject) => {
+    // Query Chrome debugging JSON endpoint
     http.get("http://localhost:9222/json", (res) => {
       let data = "";
       res.on("data", (chunk) => (data += chunk));
@@ -26,14 +31,21 @@ const getPageTargets = (): Promise<CdpTarget[]> => {
   });
 };
 
+/**
+ * Main viewport inspection routine.
+ */
 export const main = async (): Promise<void> => {
+  // Discover running page target on Vite port 5173
   const targets = await getPageTargets();
   const pageTarget = targets.find((t) => t.type === "page" && t.url.includes("5173"));
   if (!pageTarget || !pageTarget.webSocketDebuggerUrl) return;
 
+  // Open WebSocket connection to CDP target
   const ws = new WebSocket(pageTarget.webSocketDebuggerUrl);
 
+  // Evaluate OpenLayers viewport dimensions on connection
   ws.onopen = () => {
+    // Define DOM query expression for viewport element
     const expression = `(() => {
       const el = document.querySelector('.map-viewport');
       return {
@@ -44,6 +56,7 @@ export const main = async (): Promise<void> => {
       };
     })()`;
 
+    // Dispatch Runtime.evaluate request
     ws.send(
       JSON.stringify({
         id: 1,
@@ -53,6 +66,7 @@ export const main = async (): Promise<void> => {
     );
   };
 
+  // Handle evaluation response
   ws.onmessage = (event) => {
     const msg = JSON.parse(event.data.toString());
     if (msg.id === 1) {
@@ -63,4 +77,6 @@ export const main = async (): Promise<void> => {
   };
 };
 
+// Run script
 main();
+

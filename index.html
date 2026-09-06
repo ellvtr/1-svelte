@@ -1,3 +1,9 @@
+<!--
+  Svelte 5 Spatial Sandbox Host Document.
+  What: HTML5 entry shell containing the root mounting container and module script import.
+  When: Requested by the browser on initial navigation to http://localhost:5173.
+  Why: Serves the baseline viewport meta, title, and initial DOM container (#app) for Svelte 5 hydration.
+-->
 <!doctype html>
 <html lang="en">
   <head>
@@ -7,7 +13,9 @@
     <title>Svelte 5 & TypeScript Sandbox</title>
   </head>
   <body>
+    <!-- Root Svelte 5 application mounting target -->
     <div id="app"></div>
+    <!-- Application bootstrap script entry -->
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

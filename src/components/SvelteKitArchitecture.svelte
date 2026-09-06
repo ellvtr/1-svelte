@@ -8,11 +8,12 @@
 
   import type { SvelteKitPatternInfo } from "../types/spatial";
 
-  // Svelte 5 state for active pattern selection
+  // Reactive selection state: Stores the ID of the currently focused SvelteKit architecture pattern
   let selectedPatternId = $state<string>("page-server-loader");
 
-  // Pattern catalogue data with safe non-bundled snippet strings
+  // Comprehensive catalogue of core SvelteKit architectural concepts and execution scopes
   const patterns: SvelteKitPatternInfo[] = [
+    // Pattern 1: Server-only loader (+page.server.ts) for secure API keys and backend queries
     {
       id: "page-server-loader",
       name: "Server-Only Loader (+page.server.ts)",
@@ -29,9 +30,10 @@
         `env/dynamic/private';
 
 export const load: PageServerLoad = async ({ fetch, depends }) => {
+  // Invalidate cache when 'spatial:layers' key is touched
   depends('spatial:layers');
   
-  // Server-side fetch with secure private API key
+  // Server-side fetch with secure private API key (never leaked to browser bundle)
   const res = await fetch('https://services.datafordeler.dk/DHMSkyggekort/WMS?token=' + env.DATAFORDELER_KEY);
   const metadata = await res.json();
 
@@ -42,6 +44,8 @@ export const load: PageServerLoad = async ({ fetch, depends }) => {
   };
 };`,
     },
+
+    // Pattern 2: Universal loader (+page.ts) running on SSR and client SPA navigation
     {
       id: "page-universal-loader",
       name: "Universal Loader (+page.ts)",
@@ -65,6 +69,8 @@ export const load: PageLoad = async ({ fetch, data }) => {
   };
 };`,
     },
+
+    // Pattern 3: Server Action (+page.server.ts) for progressive enhancement form handling
     {
       id: "page-server-action",
       name: "Server Action (+page.server.ts)",
@@ -85,6 +91,7 @@ export const actions: Actions = {
     const formData = await request.formData();
     const geojson = formData.get('geojson');
     
+    // Validate polygon payload
     if (!geojson) {
       return fail(400, { missing: true });
     }
@@ -94,6 +101,8 @@ export const actions: Actions = {
   }
 };`,
     },
+
+    // Pattern 4: Svelte 5 Page Component (+page.svelte) consuming PageData via $props()
     {
       id: "page-svelte-component",
       name: "Svelte 5 Page Component (+page.svelte)",
@@ -114,6 +123,7 @@ export const actions: Actions = {
 
 <h1>Spatial Portal: {data.portalConfig.region}</h1>
 
+<!-- Fine-grained streaming with {#await} block directly on server promise -->
 {#await data.streamedGeoJson}
   <p>Streaming Cadastral Parcels (EPSG:25832)...</p>
 {:then parcels}
@@ -124,13 +134,15 @@ export const actions: Actions = {
     },
   ];
 
-  // Derived selected pattern
+  // Derived state: Automatically resolves the full pattern metadata for the active tab
   const activePattern = $derived(
     patterns.find((p) => p.id === selectedPatternId) ?? patterns[0],
   );
 </script>
 
+<!-- Two-column responsive layout for architectural explorer -->
 <div class="architecture-layout">
+  <!-- Left Column: Navigation list of SvelteKit pattern tabs -->
   <div class="pattern-nav">
     {#each patterns as pattern (pattern.id)}
       <button
@@ -138,16 +150,20 @@ export const actions: Actions = {
         class:selected={activePattern.id === pattern.id}
         onclick={() => (selectedPatternId = pattern.id)}
       >
+        <!-- Header badge with execution scope and pattern name -->
         <div class="tab-header">
           <span class="scope-tag {pattern.scope.toLowerCase()}">{pattern.scope}</span>
           <span class="pattern-name">{pattern.name}</span>
         </div>
+        <!-- Target filesystem path in SvelteKit routing tree -->
         <span class="file-path">{pattern.filename}</span>
       </button>
     {/each}
   </div>
 
+  <!-- Right Column: Detail preview with description and syntax-highlighted code container -->
   <div class="pattern-detail">
+    <!-- Header with pattern name, path badge, and architectural summary -->
     <div class="detail-header">
       <div class="detail-title-group">
         <h3>{activePattern.name}</h3>
@@ -156,6 +172,7 @@ export const actions: Actions = {
       <p class="detail-description">{activePattern.description}</p>
     </div>
 
+    <!-- Code viewer container displaying the exact SvelteKit file structure -->
     <div class="code-container">
       <pre><code>{activePattern.exampleSnippet}</code></pre>
     </div>
@@ -163,6 +180,7 @@ export const actions: Actions = {
 </div>
 
 <style>
+  /* Main two-column grid container */
   .architecture-layout {
     display: grid;
     grid-template-columns: 300px 1fr;
@@ -170,18 +188,21 @@ export const actions: Actions = {
     margin-top: 1rem;
   }
 
+  /* Responsive single-column fallback for mobile/tablet screens */
   @media (max-width: 768px) {
     .architecture-layout {
       grid-template-columns: 1fr;
     }
   }
 
+  /* Vertical navigation button stack */
   .pattern-nav {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
   }
 
+  /* Individual pattern selector card button */
   .pattern-tab {
     background: #0f172a;
     border: 1px solid #334155;
@@ -195,35 +216,41 @@ export const actions: Actions = {
     gap: 0.35rem;
   }
 
+  /* Hover state for non-selected tabs */
   .pattern-tab:hover {
     border-color: #475569;
     background: #1e293b;
   }
 
+  /* Active/selected pattern tab styling */
   .pattern-tab.selected {
     border-color: #3b82f6;
     background: #1e293b;
     box-shadow: 0 0 0 1px #3b82f6;
   }
 
+  /* Header grouping scope tag and pattern title */
   .tab-header {
     display: flex;
     align-items: center;
     gap: 0.5rem;
   }
 
+  /* Pattern title text */
   .pattern-name {
     font-size: 0.85rem;
     font-weight: 600;
     color: #f1f5f9;
   }
 
+  /* Filesystem path monospace label */
   .file-path {
     font-family: monospace;
     font-size: 0.75rem;
     color: #64748b;
   }
 
+  /* Execution scope tag base styling (Server, Universal, Client) */
   .scope-tag {
     font-size: 0.65rem;
     font-weight: 700;
@@ -232,21 +259,25 @@ export const actions: Actions = {
     text-transform: uppercase;
   }
 
+  /* Server-only runtime badge (Node.js/Edge) */
   .scope-tag.server {
     background: #7c3aed;
     color: #ede9fe;
   }
 
+  /* Universal runtime badge (Server SSR + Client SPA) */
   .scope-tag.universal {
     background: #0284c7;
     color: #e0f2fe;
   }
 
+  /* Client-only runtime badge (Browser DOM) */
   .scope-tag.client {
     background: #059669;
     color: #d1fae5;
   }
 
+  /* Right-side detail card container */
   .pattern-detail {
     background: #0f172a;
     border: 1px solid #334155;
@@ -257,12 +288,14 @@ export const actions: Actions = {
     gap: 1rem;
   }
 
+  /* Header area inside detail panel */
   .detail-header {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
   }
 
+  /* Horizontal title bar inside detail panel */
   .detail-title-group {
     display: flex;
     align-items: center;
@@ -271,12 +304,14 @@ export const actions: Actions = {
     gap: 0.5rem;
   }
 
+  /* Detail title heading */
   h3 {
     margin: 0;
     font-size: 1.1rem;
     color: #f8fafc;
   }
 
+  /* Inline file path badge */
   .file-badge code {
     background: #1e293b;
     padding: 0.2rem 0.5rem;
@@ -286,6 +321,7 @@ export const actions: Actions = {
     border: 1px solid #334155;
   }
 
+  /* Architectural rationale description text */
   .detail-description {
     font-size: 0.85rem;
     color: #94a3b8;
@@ -293,6 +329,7 @@ export const actions: Actions = {
     line-height: 1.4;
   }
 
+  /* Code block scrollable container */
   .code-container {
     background: #020617;
     border: 1px solid #1e293b;
@@ -301,6 +338,7 @@ export const actions: Actions = {
     overflow-x: auto;
   }
 
+  /* Preformatted code block styling */
   pre {
     margin: 0;
     font-family: monospace;
@@ -309,3 +347,4 @@ export const actions: Actions = {
     line-height: 1.5;
   }
 </style>
+

@@ -23,7 +23,7 @@
   import { danishCadastralGeoJson } from "../data/cadastralParcels";
   import type { LayerConfig } from "../types/spatial";
 
-  // Component props using Svelte 5 $props
+  // Component props definition with default camera coordinates centered over Denmark
   type Props = {
     initialZoom?: number;
     initialLon?: number;
@@ -32,25 +32,26 @@
 
   const { initialZoom = 7, initialLon = 10.5, initialLat = 56.0 }: Props = $props();
 
-  // Local DOM reference and map instance state
+  // Local DOM element reference for OpenLayers canvas attachment
   let mapContainer = $state<HTMLDivElement | null>(null);
+  // Reference to the active OpenLayers Map instance
   let mapInstance = $state<Map | null>(null);
 
-  // Plain record mapping layer ID to OpenLayers layer instance
+  // Registry dictionary mapping store layer IDs to instantiated OpenLayers layer objects
   let layerRegistry: Record<string, BaseLayer> = {};
 
-  // Derived telemetry
+  // Derived telemetry values from global reactive spatial store
   const currentCenter = $derived(spatialStore.center);
   const activeCount = $derived(spatialStore.activeLayerCount);
   const cursorCoords = $derived(spatialStore.cursorPosition);
   const currentZoom = $derived(spatialStore.zoom);
 
   /**
-   * Creates styled OpenLayers layer (TileLayer or VectorLayer) from store LayerConfig.
+   * Instantiates and styles the appropriate OpenLayers layer (Vector, WMS, or XYZ) from store configuration.
    */
   const createOlLayer = (config: LayerConfig): BaseLayer => {
     if (config.type === "Vector") {
-      // Create Vector Layer with Danish Cadastral Parcels and Boundary Labels
+      // Vector Layer: Danish Cadastral Parcels with dashed boundary lines and parcel label styling
       const features = new GeoJSON().readFeatures(danishCadastralGeoJson, {
         featureProjection: "EPSG:3857",
       });
@@ -89,6 +90,7 @@
     }
 
     if (config.type === "WMS") {
+      // WMS Layer: OGC Web Map Service tile layer (e.g. DHM elevation hillshade)
       return new TileLayer({
         source: new TileWMS({
           url: config.url,
@@ -101,7 +103,7 @@
       });
     }
 
-    // Default to XYZ raster tile layer
+    // Default Layer: Slippy XYZ raster tile layer (e.g. OpenStreetMap, Ortofoto)
     return new TileLayer({
       source: new XYZ({
         url: config.url,
@@ -113,11 +115,11 @@
     });
   };
 
-  // Mount OpenLayers map on component initialization
+  // Lifecycle onMount: Attaches OpenLayers canvas to DOM container and binds event listeners
   onMount(() => {
     if (!mapContainer) return;
 
-    // Clear registry and build all layers from store
+    // Initialize layer registry and instantiate OpenLayers layer objects
     layerRegistry = {};
     const olLayers: BaseLayer[] = [];
 
@@ -127,7 +129,7 @@
       olLayers.push(olLayer);
     }
 
-    // Create OpenLayers Map instance
+    // Instantiate OpenLayers Map with EPSG:3857 spherical mercator projection
     const map = new Map({
       target: mapContainer,
       layers: olLayers,
@@ -140,12 +142,12 @@
 
     mapInstance = map;
 
-    // Trigger initial size update
+    // Trigger initial viewport size recalculation after DOM layout pass
     setTimeout(() => {
       map.updateSize();
     }, 100);
 
-    // Synchronize map view move events to store
+    // Event listener: Synchronize view pan and zoom level changes back to spatialStore
     map.on("moveend", () => {
       const view = map.getView();
       const zoomLevel = view.getZoom();
@@ -159,7 +161,7 @@
       }
     });
 
-    // Pointer move listener for coordinate telemetry
+    // Event listener: Track mouse pointer position and update coordinate telemetry
     map.on("pointermove", (evt) => {
       if (evt.coordinate) {
         const [lon, lat] = toLonLat(evt.coordinate);
@@ -167,7 +169,7 @@
       }
     });
 
-    // Cleanup hook on unmount
+    // Teardown cleanup handler on component destroy
     return () => {
       map.setTarget(undefined);
       mapInstance = null;
@@ -175,7 +177,7 @@
     };
   });
 
-  // Reactive effect: synchronize store layer visibility and opacity with OpenLayers layers
+  // Reactive effect: Synchronize store layer visibility and opacity changes to OpenLayers instances
   $effect(() => {
     if (!mapInstance) return;
 
@@ -189,7 +191,7 @@
   });
 
   /**
-   * Centers the viewport over central Denmark.
+   * Resets the map camera position and zoom level to encompass Denmark overview.
    */
   const resetToDenmark = (): void => {
     if (!mapInstance) return;
@@ -201,7 +203,7 @@
   };
 
   /**
-   * Zooms directly to a city center at street parcel scale.
+   * Smoothly animates camera to street parcel scale for Danish municipal centers.
    */
   const zoomToCity = (lon: number, lat: number): void => {
     if (!mapInstance) return;
@@ -213,7 +215,7 @@
   };
 
   /**
-   * Adjusts zoom by relative delta.
+   * Adjusts current map zoom level by a positive or negative delta.
    */
   const handleZoom = (delta: number): void => {
     if (!mapInstance) return;
@@ -226,16 +228,21 @@
   };
 </script>
 
+<!-- Outer Map Widget Container -->
 <div class="map-wrapper">
+  <!-- Target HTML element where OpenLayers injects its WebGL/Canvas renderer -->
   <div class="map-viewport" bind:this={mapContainer}></div>
 
+  <!-- Floating Map Control Buttons Overlay -->
   <div class="map-overlay-controls">
+    <!-- Zoom buttons and national overview reset button -->
     <div class="btn-group">
       <button class="ctrl-btn" onclick={() => handleZoom(1)} title="Zoom In">+</button>
       <button class="ctrl-btn" onclick={() => handleZoom(-1)} title="Zoom Out">-</button>
       <button class="ctrl-btn reset" onclick={resetToDenmark} title="Overview DK">DK</button>
     </div>
 
+    <!-- Quick jump buttons to major Danish municipal centers -->
     <div class="city-jump-group">
       <button class="city-btn" onclick={() => zoomToCity(10.2045, 56.1530)} title="Zoom to Aarhus Parcels">
         Aarhus
@@ -249,17 +256,21 @@
     </div>
   </div>
 
+  <!-- Conditional notification banner reminding user of zoom threshold for cadastral vector features -->
   {#if currentZoom < 12 && spatialStore.layers.find(l => l.id === "matrikel-vector")?.visible}
     <div class="zoom-hint">
       Zoom in to level 12+ (or click a city button) to render cadastral parcels
     </div>
   {/if}
 
+  <!-- Footer status bar displaying live coordinate telemetry -->
   <footer class="telemetry-bar">
+    <!-- Center coordinate display in WGS84 decimal degrees -->
     <div class="telemetry-item">
       <span class="label">Center:</span>
       <span class="value">{currentCenter.lat.toFixed(4)}°N, {currentCenter.lon.toFixed(4)}°E</span>
     </div>
+    <!-- Live mouse cursor coordinate display -->
     <div class="telemetry-item">
       <span class="label">Cursor:</span>
       <span class="value">
@@ -268,6 +279,7 @@
           : "Hover over map"}
       </span>
     </div>
+    <!-- Active layer count badge -->
     <div class="telemetry-item">
       <span class="label">Active Layers:</span>
       <span class="badge-count">{activeCount}</span>
@@ -276,6 +288,7 @@
 </div>
 
 <style>
+  /* Outer relative container wrapping OpenLayers canvas and overlay controls */
   .map-wrapper {
     position: relative;
     width: 100%;
@@ -288,12 +301,14 @@
     flex-direction: column;
   }
 
+  /* Full-bleed map viewport target for OpenLayers canvas */
   .map-viewport {
     flex: 1;
     width: 100%;
     height: 100%;
   }
 
+  /* Floating container positioning map navigation controls in top-left corner */
   .map-overlay-controls {
     position: absolute;
     top: 12px;
@@ -303,18 +318,21 @@
     gap: 8px;
   }
 
+  /* Vertical button stack for zoom in, zoom out, and reset */
   .btn-group {
     display: flex;
     flex-direction: column;
     gap: 4px;
   }
 
+  /* Vertical button stack for quick city navigation jumps */
   .city-jump-group {
     display: flex;
     flex-direction: column;
     gap: 4px;
   }
 
+  /* Square control icon button styling */
   .ctrl-btn {
     width: 32px;
     height: 32px;
@@ -331,17 +349,20 @@
     transition: all 0.15s ease;
   }
 
+  /* Hover state for map control buttons */
   .ctrl-btn:hover {
     background: #2563eb;
     border-color: #3b82f6;
   }
 
+  /* Special styling for Denmark national reset button */
   .ctrl-btn.reset {
     font-size: 0.75rem;
     font-weight: 800;
     background: #0f172a;
   }
 
+  /* Compact city navigation jump pill button */
   .city-btn {
     padding: 0.25rem 0.5rem;
     background: rgba(15, 23, 42, 0.85);
@@ -355,12 +376,14 @@
     transition: all 0.15s ease;
   }
 
+  /* Hover state for city jump buttons */
   .city-btn:hover {
     background: #2563eb;
     color: #ffffff;
     border-color: #3b82f6;
   }
 
+  /* Floating banner warning user when zoomed out beyond vector parcel rendering threshold */
   .zoom-hint {
     position: absolute;
     bottom: 48px;
@@ -377,6 +400,7 @@
     pointer-events: none;
   }
 
+  /* Bottom telemetry bar displaying live coordinate telemetry and active layer count */
   .telemetry-bar {
     display: flex;
     justify-content: space-between;
@@ -391,23 +415,27 @@
     gap: 0.5rem;
   }
 
+  /* Individual telemetry field container */
   .telemetry-item {
     display: flex;
     align-items: center;
     gap: 0.35rem;
   }
 
+  /* Telemetry field label text */
   .label {
     font-weight: 600;
     color: #64748b;
   }
 
+  /* Telemetry numeric value monospace label */
   .value {
     color: #f1f5f9;
     font-family: monospace;
     font-size: 0.85rem;
   }
 
+  /* Active layer count pill badge */
   .badge-count {
     background: #2563eb;
     color: #ffffff;
@@ -417,3 +445,4 @@
     font-size: 0.75rem;
   }
 </style>
+

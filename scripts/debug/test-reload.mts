@@ -7,6 +7,7 @@
 
 import http from "node:http";
 
+// Chrome target metadata definition
 type CdpTarget = {
   id: string;
   title: string;
@@ -15,8 +16,12 @@ type CdpTarget = {
   webSocketDebuggerUrl?: string;
 };
 
+/**
+ * Fetches the active page targets from Chrome CDP HTTP endpoint.
+ */
 const getPageTargets = (): Promise<CdpTarget[]> => {
   return new Promise((resolve, reject) => {
+    // Query Chrome JSON debugging endpoint
     http.get("http://localhost:9222/json", (res) => {
       let data = "";
       res.on("data", (chunk) => (data += chunk));
@@ -26,18 +31,27 @@ const getPageTargets = (): Promise<CdpTarget[]> => {
   });
 };
 
+/**
+ * Main reload verification workflow.
+ */
 export const main = async (): Promise<void> => {
+  // Step 1: Discover running page target on Vite port 5173
   const targets = await getPageTargets();
   const pageTarget = targets.find((t) => t.type === "page" && t.url.includes("5173"));
   if (!pageTarget || !pageTarget.webSocketDebuggerUrl) return;
 
+  // Step 2: Open WebSocket connection to CDP target
   const ws = new WebSocket(pageTarget.webSocketDebuggerUrl);
 
+  // Step 3: Trigger page reload and evaluate rehydration state
   ws.onopen = () => {
     console.log("[cdp] Reloading page in Chrome...");
+    // Send Page.reload command to Chrome
     ws.send(JSON.stringify({ id: 1, method: "Page.reload" }));
 
+    // Wait 1000ms for full Svelte component hydration and OpenLayers initialization
     setTimeout(() => {
+      // Define JS expression checking OpenLayers DOM viewport and canvas count
       const expression = `(() => {
         return {
           olViewportExists: !!document.querySelector('.ol-viewport'),
@@ -47,6 +61,7 @@ export const main = async (): Promise<void> => {
         };
       })()`;
 
+      // Evaluate rehydration state
       ws.send(
         JSON.stringify({
           id: 2,
@@ -57,6 +72,7 @@ export const main = async (): Promise<void> => {
     }, 1000);
   };
 
+  // Step 4: Handle response message and terminate
   ws.onmessage = (event) => {
     const msg = JSON.parse(event.data.toString());
     if (msg.id === 2) {
@@ -67,4 +83,6 @@ export const main = async (): Promise<void> => {
   };
 };
 
+// Run script
 main();
+

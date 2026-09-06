@@ -598,6 +598,7 @@ export default async function LayerPage({ params }) {
 </div>
 
 <style>
+  /* Outer flex container wrapping filter tabs and cards grid */
   .playground-wrapper {
     display: flex;
     flex-direction: column;
@@ -605,6 +606,7 @@ export default async function LayerPage({ params }) {
     margin-top: 20px;
   }
 
+  /* Filter category pill bar container */
   .category-bar {
     display: flex;
     gap: 8px;
@@ -615,6 +617,7 @@ export default async function LayerPage({ params }) {
     border: 1px solid #1e293b;
   }
 
+  /* Category selector tab button */
   .cat-btn {
     background: transparent;
     border: none;
@@ -627,29 +630,34 @@ export default async function LayerPage({ params }) {
     transition: all 0.15s ease;
   }
 
+  /* Category tab button hover state */
   .cat-btn:hover {
     color: #f8fafc;
     background: #1e293b;
   }
 
+  /* Active/selected category tab button styling */
   .cat-btn.active {
     background: #38bdf8;
     color: #0f172a;
     font-weight: 600;
   }
 
+  /* Responsive grid layout holding all playground concept cards */
   .cards-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
     gap: 16px;
   }
 
+  /* Card description summary paragraph */
   .desc {
     color: #cbd5e1;
     font-size: 0.8125rem;
     margin: 0;
   }
 
+  /* Horizontal action button controls row */
   .row-controls {
     display: flex;
     align-items: center;
@@ -657,6 +665,7 @@ export default async function LayerPage({ params }) {
     flex-wrap: wrap;
   }
 
+  /* Base interactive action button */
   .btn {
     padding: 6px 12px;
     font-size: 0.8125rem;
@@ -669,33 +678,40 @@ export default async function LayerPage({ params }) {
     transition: background 0.15s ease;
   }
 
+  /* Base button hover state */
   .btn:hover {
     background: #475569;
   }
 
+  /* Primary action button variant */
   .btn.primary {
     background: #0284c7;
     border-color: #38bdf8;
   }
 
+  /* Primary button hover state */
   .btn.primary:hover {
     background: #0369a1;
   }
 
+  /* Destructive action button variant */
   .btn.danger {
     background: #dc2626;
     border-color: #ef4444;
   }
 
+  /* Destructive button hover state */
   .btn.danger:hover {
     background: #b91c1c;
   }
 
+  /* Compact button variant */
   .btn.small {
     padding: 4px 8px;
     font-size: 0.75rem;
   }
 
+  /* Formatted live evaluation output panel */
   .result-box {
     background: #0f172a;
     border: 1px solid #1e293b;
@@ -708,11 +724,13 @@ export default async function LayerPage({ params }) {
     gap: 4px;
   }
 
+  /* Numeric badge highlight label */
   .badge-num {
     color: #38bdf8;
     font-weight: 700;
   }
 
+  /* Target element box for bind:this DOM measurement demonstration */
   .measured-target-box {
     background: #0f172a;
     border: 1px dashed #38bdf8;
@@ -725,6 +743,7 @@ export default async function LayerPage({ params }) {
     font-size: 0.8125rem;
   }
 
+  /* Text input for dynamic layer filtering */
   .filter-input {
     background: #0f172a;
     border: 1px solid #334155;
@@ -735,16 +754,19 @@ export default async function LayerPage({ params }) {
     outline: none;
   }
 
+  /* Filter input focus outline */
   .filter-input:focus {
     border-color: #38bdf8;
   }
 
+  /* Vertical stack for rendered snippet chips */
   .layer-chips-row {
     display: flex;
     flex-direction: column;
     gap: 6px;
   }
 
+  /* Reset wrapper button for clickable chip badges */
   .chip-toggle {
     background: transparent;
     border: none;
@@ -753,6 +775,7 @@ export default async function LayerPage({ params }) {
     cursor: pointer;
   }
 
+  /* Badge chip container created by {#snippet} */
   .snippet-chip {
     display: flex;
     align-items: center;
@@ -766,12 +789,14 @@ export default async function LayerPage({ params }) {
     transition: all 0.15s ease;
   }
 
+  /* Active state for badge chip */
   .snippet-chip.chip-active {
     border-color: #38bdf8;
     background: rgba(56, 189, 248, 0.1);
     color: #f8fafc;
   }
 
+  /* Status indicator dot inside chip */
   .chip-dot {
     width: 8px;
     height: 8px;
@@ -779,25 +804,30 @@ export default async function LayerPage({ params }) {
     background: #64748b;
   }
 
+  /* Glowing dot indicator for active chip */
   .chip-active .chip-dot {
     background: #38bdf8;
     box-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
   }
 
+  /* Text label inside chip */
   .chip-text {
     flex: 1;
   }
 
+  /* Layer size label inside chip */
   .chip-size {
     font-size: 0.75rem;
     color: #64748b;
   }
 
+  /* Heartbeat ticks counter badge */
   .ticks-badge {
     color: #38bdf8;
     font-size: 0.8125rem;
   }
 
+  /* Scrolling log console for microtask lifecycle effects */
   .log-stream {
     background: #0f172a;
     border: 1px solid #1e293b;
@@ -812,29 +842,34 @@ export default async function LayerPage({ params }) {
     gap: 2px;
   }
 
+  /* Single log output entry line */
   .log-line {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
+  /* Child component demo container */
   .child-demo-box {
     display: flex;
     flex-direction: column;
     gap: 4px;
   }
 
+  /* Child demo description label */
   .demo-label {
     font-size: 0.75rem;
     color: #94a3b8;
   }
 
+  /* Grid layout demonstrating multiple snippet render outputs */
   .snippet-demo-grid {
     display: flex;
     flex-direction: column;
     gap: 6px;
   }
 
+  /* Simulated browser shell window for SvelteKit +layout demonstration */
   .simulated-browser-shell {
     background: #0f172a;
     border: 1px solid #334155;
@@ -842,6 +877,7 @@ export default async function LayerPage({ params }) {
     overflow: hidden;
   }
 
+  /* Browser shell top navigation bar */
   .shell-bar {
     background: #1e293b;
     padding: 6px 10px;
@@ -851,17 +887,20 @@ export default async function LayerPage({ params }) {
     border-bottom: 1px solid #334155;
   }
 
+  /* Browser shell title text */
   .shell-title {
     font-size: 0.75rem;
     font-weight: 600;
     color: #cbd5e1;
   }
 
+  /* Browser shell link navigation group */
   .shell-nav {
     display: flex;
     gap: 4px;
   }
 
+  /* Browser shell navigation route tab link */
   .shell-link {
     background: transparent;
     border: none;
@@ -872,20 +911,24 @@ export default async function LayerPage({ params }) {
     cursor: pointer;
   }
 
+  /* Active route link inside browser shell */
   .shell-link.active {
     background: #0284c7;
     color: #f8fafc;
   }
 
+  /* Container displaying nested child route content */
   .nested-child-page {
     padding: 12px;
   }
 
+  /* Child page text content */
   .page-content {
     font-size: 0.8125rem;
     color: #38bdf8;
   }
 
+  /* Loading animation pulse indicator */
   .loading-pulse {
     color: #f59e0b;
     font-weight: 500;

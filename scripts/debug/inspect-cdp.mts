@@ -7,6 +7,7 @@
 
 import http from "node:http";
 
+// Chrome DevTools Protocol Target descriptor
 type CdpTarget = {
   id: string;
   title: string;
@@ -20,6 +21,7 @@ type CdpTarget = {
  */
 const getPageTargets = (): Promise<CdpTarget[]> => {
   return new Promise((resolve, reject) => {
+    // Query Chrome's JSON target discovery endpoint
     http.get("http://localhost:9222/json", (res) => {
       let data = "";
       res.on("data", (chunk) => (data += chunk));
@@ -39,7 +41,9 @@ const getPageTargets = (): Promise<CdpTarget[]> => {
  * Main CDP evaluation workflow.
  */
 export const main = async (): Promise<void> => {
+  // Step 1: Discover all open browser tabs and targets
   const targets = await getPageTargets();
+  // Step 2: Locate the active Vite sandbox page tab on port 5173
   const pageTarget = targets.find((t) => t.type === "page" && t.url.includes("5173"));
 
   if (!pageTarget || !pageTarget.webSocketDebuggerUrl) {
@@ -49,14 +53,16 @@ export const main = async (): Promise<void> => {
 
   console.log(`[cdp] Connecting to Chrome tab: ${pageTarget.title} (${pageTarget.url})`);
 
+  // Step 3: Establish WebSocket connection to Chrome DevTools Protocol
   const ws = new WebSocket(pageTarget.webSocketDebuggerUrl);
 
+  // Step 4: Handle WebSocket connection open event
   ws.onopen = () => {
-    // Enable Runtime and DOM domains
+    // Enable Runtime and Console Log domains
     ws.send(JSON.stringify({ id: 1, method: "Runtime.enable" }));
     ws.send(JSON.stringify({ id: 2, method: "Log.enable" }));
 
-    // Evaluate DOM query and state in browser
+    // Define self-executing JS function string to evaluate live DOM properties
     const expression = `(() => {
       return {
         title: document.title,
@@ -77,6 +83,7 @@ export const main = async (): Promise<void> => {
       };
     })()`;
 
+    // Dispatch Runtime.evaluate request to Chrome runtime
     ws.send(
       JSON.stringify({
         id: 3,
@@ -89,9 +96,11 @@ export const main = async (): Promise<void> => {
     );
   };
 
+  // Step 5: Handle responses and evaluation result from Chrome
   ws.onmessage = (event) => {
     const msg = JSON.parse(event.data.toString());
 
+    // Check for matching evaluate response ID
     if (msg.id === 3) {
       console.log("[cdp] Live Browser DOM & Component State:");
       console.log(JSON.stringify(msg.result?.result?.value, null, 2));
@@ -100,13 +109,16 @@ export const main = async (): Promise<void> => {
     }
   };
 
+  // Step 6: Handle WebSocket transport errors
   ws.onerror = (err) => {
     console.error("[cdp] WebSocket error:", err);
     process.exit(1);
   };
 };
 
+// Execute CDP workflow
 main().catch((err) => {
   console.error("[cdp] Fatal error:", err);
   process.exit(1);
 });
+
