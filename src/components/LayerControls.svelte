@@ -7,6 +7,7 @@
    */
 
   import { spatialStore } from "../services/spatialStore.svelte";
+  import type { LayerConfig } from "../types/spatial";
 
   // Svelte 5 search query filter state
   let searchQuery = $state<string>("");
@@ -21,6 +22,51 @@
   );
 </script>
 
+<!-- Svelte 5 Snippet: Reusable template fragment replacing legacy slots -->
+{#snippet layerRow(layer: LayerConfig)}
+  <div class="layer-row" class:active={layer.visible}>
+    <div class="layer-main">
+      <div class="layer-title-bar">
+        <span class="type-pill {layer.type.toLowerCase()}">{layer.type}</span>
+        <span class="name">{layer.name}</span>
+      </div>
+      <span class="attribution">{layer.attribution}</span>
+    </div>
+
+    <div class="layer-actions">
+      {#if layer.visible}
+        <div class="opacity-group">
+          <label for="opacity-{layer.id}" class="opacity-label">
+            {Math.round(layer.opacity * 100)}%
+          </label>
+          <input
+            id="opacity-{layer.id}"
+            type="range"
+            min="0"
+            max="1"
+            step="0.05"
+            value={layer.opacity}
+            oninput={(e) =>
+              spatialStore.setLayerOpacity(
+                layer.id,
+                parseFloat((e.target as HTMLInputElement).value),
+              )}
+            class="opacity-slider"
+          />
+        </div>
+      {/if}
+
+      <button
+        class="toggle-switch"
+        class:enabled={layer.visible}
+        onclick={() => spatialStore.toggleLayer(layer.id)}
+      >
+        {layer.visible ? "Visible" : "Hidden"}
+      </button>
+    </div>
+  </div>
+{/snippet}
+
 <div class="layer-panel">
   <div class="panel-header">
     <h3>Spatial Layer Catalog</h3>
@@ -34,47 +80,7 @@
 
   <div class="layer-items">
     {#each filteredLayers as layer (layer.id)}
-      <div class="layer-row" class:active={layer.visible}>
-        <div class="layer-main">
-          <div class="layer-title-bar">
-            <span class="type-pill {layer.type.toLowerCase()}">{layer.type}</span>
-            <span class="name">{layer.name}</span>
-          </div>
-          <span class="attribution">{layer.attribution}</span>
-        </div>
-
-        <div class="layer-actions">
-          {#if layer.visible}
-            <div class="opacity-group">
-              <label for="opacity-{layer.id}" class="opacity-label">
-                {Math.round(layer.opacity * 100)}%
-              </label>
-              <input
-                id="opacity-{layer.id}"
-                type="range"
-                min="0"
-                max="1"
-                step="0.05"
-                value={layer.opacity}
-                oninput={(e) =>
-                  spatialStore.setLayerOpacity(
-                    layer.id,
-                    parseFloat((e.target as HTMLInputElement).value),
-                  )}
-                class="opacity-slider"
-              />
-            </div>
-          {/if}
-
-          <button
-            class="toggle-switch"
-            class:enabled={layer.visible}
-            onclick={() => spatialStore.toggleLayer(layer.id)}
-          >
-            {layer.visible ? "Visible" : "Hidden"}
-          </button>
-        </div>
-      </div>
+      {@render layerRow(layer)}
     {/each}
   </div>
 </div>

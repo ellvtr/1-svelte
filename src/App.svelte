@@ -9,6 +9,7 @@
   import SpatialMap from "./components/SpatialMap.svelte";
   import LayerControls from "./components/LayerControls.svelte";
   import SvelteKitArchitecture from "./components/SvelteKitArchitecture.svelte";
+  import RunesLivePlayground from "./components/RunesLivePlayground.svelte";
   import { spatialStore } from "./services/spatialStore.svelte";
 
   // Tab navigation state using Svelte 5 $state rune
@@ -136,6 +137,7 @@
           </tbody>
         </table>
       </div>
+      <RunesLivePlayground />
     </section>
   {/if}
 
