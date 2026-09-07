@@ -1,15 +1,16 @@
-/**
- * Svelte Compiler & Preprocessor Configuration.
- * What: Defines Svelte preprocessing pipelines for TypeScript and component compilation.
- * When: Invoked during Vite dev/build pipelines and svelte-check diagnostics.
- * Why: Enables TypeScript preprocessing inside Svelte components with strict type checking.
- */
-
+import adapter from "@sveltejs/adapter-auto";
 import { vitePreprocess } from "@sveltejs/vite-plugin-svelte";
-import type { Options } from "@sveltejs/vite-plugin-svelte";
+import type { Config } from "@sveltejs/kit";
 
-const config: Options = {
+const config: Config = {
+  // Consult https://svelte.dev/docs/kit/integrations#preprocessors
   preprocess: vitePreprocess(),
+
+  kit: {
+    // adapter-auto only supports some environments, see https://svelte.dev/docs/kit/adapter-auto for a list.
+    // If your environment is not supported, or you settled on a specific environment, switch out the adapter.
+    adapter: adapter(),
+  },
 };
 
 export default config;

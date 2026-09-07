@@ -1,0 +1,20 @@
+{
+	"/": [
+		"src/routes/+page.ts",
+		"src/routes/+layout.ts",
+		"src/routes/+layout.ts"
+	],
+	"/map": [
+		"src/routes/+layout.ts"
+	],
+	"/runes": [
+		"src/routes/+layout.ts"
+	],
+	"/sveltekit": [
+		"src/routes/sveltekit/+page.server.ts",
+		"src/routes/+layout.ts"
+	],
+	"/telemetry": [
+		"src/routes/+layout.ts"
+	]
+}
