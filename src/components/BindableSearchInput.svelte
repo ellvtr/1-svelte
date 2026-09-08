@@ -1,21 +1,19 @@
 <script lang="ts">
   /**
-   * Two-Way Bindable Search Input Component.
+   * Two-Way Bindable Search Input Component (shadcn-svelte & Tailwind).
    * What: Reusable search input field demonstrating Svelte 5 $props() and $bindable() two-way reactivity.
    * When: Invoked by parent components (such as RunesLivePlayground) requiring synchronized query filtering.
    * Why: Proves how Svelte 5 eliminates React-style onChange callback boilerplate by offering safe, opt-in two-way binding.
    */
 
-  /**
-   * Properties contract for BindableSearchInput.
-   */
+  import { X } from "lucide-svelte";
+
   interface SearchProps {
     value?: string;
     placeholder?: string;
     onReset?: () => void;
   }
 
-  // Component props extracted with $props(); value is marked $bindable() for parent two-way binding
   let {
     value = $bindable(""),
     placeholder = "Filter layers...",
@@ -23,59 +21,24 @@
   }: SearchProps = $props();
 </script>
 
-<div class="bindable-input-wrapper">
+<div class="relative flex items-center w-full">
   <input
     type="text"
     bind:value={value}
     {placeholder}
-    class="custom-input"
+    class="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-1.5 pr-8 text-xs text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors"
   />
   {#if value.length > 0}
-    <button type="button" class="clear-btn" onclick={() => { value = ""; onReset?.(); }}>
-      ✕
+    <button
+      type="button"
+      class="absolute right-2 p-1 text-slate-400 hover:text-slate-100 hover:bg-slate-800 rounded transition-colors cursor-pointer"
+      onclick={() => {
+        value = "";
+        onReset?.();
+      }}
+      aria-label="Clear input"
+    >
+      <X class="h-3 w-3" />
     </button>
   {/if}
 </div>
-
-<style>
-  .bindable-input-wrapper {
-    display: flex;
-    align-items: center;
-    position: relative;
-    width: 100%;
-  }
-
-  .custom-input {
-    width: 100%;
-    padding: 8px 32px 8px 12px;
-    background: #0f172a;
-    border: 1px solid #334155;
-    border-radius: 6px;
-    color: #f8fafc;
-    font-size: 0.875rem;
-    font-family: inherit;
-    outline: none;
-    transition: border-color 0.15s ease;
-  }
-
-  .custom-input:focus {
-    border-color: #38bdf8;
-  }
-
-  .clear-btn {
-    position: absolute;
-    right: 8px;
-    background: transparent;
-    border: none;
-    color: #94a3b8;
-    font-size: 0.875rem;
-    cursor: pointer;
-    padding: 2px 6px;
-    border-radius: 4px;
-  }
-
-  .clear-btn:hover {
-    color: #f8fafc;
-    background: #334155;
-  }
-</style>

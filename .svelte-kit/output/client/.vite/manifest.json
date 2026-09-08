@@ -1,0 +1,352 @@
+{
+  ".svelte-kit/generated/client-optimized/app.js": {
+    "file": "_app/immutable/entry/app.9qnCMrkM.js",
+    "name": "entry/app",
+    "src": ".svelte-kit/generated/client-optimized/app.js",
+    "isEntry": true,
+    "imports": [
+      "_BnUNuAoI.js",
+      "_DJDQ8-C8.js",
+      "_Hp--vKbm.js",
+      "_rT77PjNg.js",
+      "_fAyqCvjl.js",
+      "_BzzW2Nnb.js",
+      "_B0zqnGNS.js"
+    ],
+    "dynamicImports": [
+      ".svelte-kit/generated/client-optimized/nodes/0.js",
+      ".svelte-kit/generated/client-optimized/nodes/1.js",
+      ".svelte-kit/generated/client-optimized/nodes/2.js",
+      ".svelte-kit/generated/client-optimized/nodes/3.js",
+      ".svelte-kit/generated/client-optimized/nodes/4.js",
+      ".svelte-kit/generated/client-optimized/nodes/5.js",
+      ".svelte-kit/generated/client-optimized/nodes/6.js",
+      ".svelte-kit/generated/shared/error-template.js"
+    ]
+  },
+  ".svelte-kit/generated/client-optimized/nodes/0.js": {
+    "file": "_app/immutable/nodes/0.CsLkyswR.js",
+    "name": "nodes/0",
+    "src": ".svelte-kit/generated/client-optimized/nodes/0.js",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "imports": [
+      "_Hp--vKbm.js",
+      "_BnUNuAoI.js",
+      "_DJDQ8-C8.js",
+      "_Bu6VdSB7.js",
+      "_BtbLPWZn.js",
+      "_BbGlzZQR.js",
+      "_9tShlU7T.js",
+      "_C9-a8xMZ.js",
+      "_BO4NN2_1.js"
+    ],
+    "css": [
+      "_app/immutable/assets/0.ADDz4xdy.css"
+    ]
+  },
+  ".svelte-kit/generated/client-optimized/nodes/1.js": {
+    "file": "_app/immutable/nodes/1.B88D0JWr.js",
+    "name": "nodes/1",
+    "src": ".svelte-kit/generated/client-optimized/nodes/1.js",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "imports": [
+      "_Hp--vKbm.js",
+      "_BnUNuAoI.js",
+      "_DJDQ8-C8.js",
+      "_BtbLPWZn.js"
+    ]
+  },
+  ".svelte-kit/generated/client-optimized/nodes/2.js": {
+    "file": "_app/immutable/nodes/2.C50MjzrB.js",
+    "name": "nodes/2",
+    "src": ".svelte-kit/generated/client-optimized/nodes/2.js",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "imports": [
+      "_-UyI9lYi.js",
+      "_B0XwC4Ot.js",
+      "_Hp--vKbm.js",
+      "_CZsy3AN3.js"
+    ]
+  },
+  ".svelte-kit/generated/client-optimized/nodes/3.js": {
+    "file": "_app/immutable/nodes/3.BWSdQys8.js",
+    "name": "nodes/3",
+    "src": ".svelte-kit/generated/client-optimized/nodes/3.js",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "imports": [
+      "_Hp--vKbm.js",
+      "_CZsy3AN3.js",
+      "_BnUNuAoI.js",
+      "_Bu6VdSB7.js",
+      "_rT77PjNg.js",
+      "_DJDQ8-C8.js",
+      "_fAyqCvjl.js",
+      "_B0zqnGNS.js",
+      "_BbGlzZQR.js",
+      "_D3T7FWAk.js",
+      "_C-CaxYtR.js",
+      "_0eM_fo8n.js",
+      "_BzzW2Nnb.js",
+      "_C9-a8xMZ.js"
+    ],
+    "css": [
+      "_app/immutable/assets/3.CXkAYFSX.css"
+    ]
+  },
+  ".svelte-kit/generated/client-optimized/nodes/4.js": {
+    "file": "_app/immutable/nodes/4.yHPsMorh.js",
+    "name": "nodes/4",
+    "src": ".svelte-kit/generated/client-optimized/nodes/4.js",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "imports": [
+      "_Hp--vKbm.js",
+      "_CZsy3AN3.js",
+      "_BnUNuAoI.js",
+      "_Bu6VdSB7.js",
+      "_rT77PjNg.js",
+      "_DJDQ8-C8.js",
+      "_fAyqCvjl.js",
+      "_D3T7FWAk.js",
+      "_B0zqnGNS.js",
+      "_BbGlzZQR.js",
+      "_BPhkdM9g.js",
+      "_C-CaxYtR.js",
+      "_0eM_fo8n.js",
+      "_BO4NN2_1.js"
+    ],
+    "css": [
+      "_app/immutable/assets/4.bQk1h888.css"
+    ]
+  },
+  ".svelte-kit/generated/client-optimized/nodes/5.js": {
+    "file": "_app/immutable/nodes/5.Cx6QTC5Z.js",
+    "name": "nodes/5",
+    "src": ".svelte-kit/generated/client-optimized/nodes/5.js",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "imports": [
+      "_Hp--vKbm.js",
+      "_BnUNuAoI.js",
+      "_DJDQ8-C8.js",
+      "_fAyqCvjl.js",
+      "_Bu6VdSB7.js",
+      "_BPhkdM9g.js",
+      "_C-CaxYtR.js",
+      "_0eM_fo8n.js",
+      "_CZsy3AN3.js",
+      "_BO4NN2_1.js",
+      "_C9-a8xMZ.js"
+    ]
+  },
+  ".svelte-kit/generated/client-optimized/nodes/6.js": {
+    "file": "_app/immutable/nodes/6.708EQh4b.js",
+    "name": "nodes/6",
+    "src": ".svelte-kit/generated/client-optimized/nodes/6.js",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "imports": [
+      "_Hp--vKbm.js",
+      "_BnUNuAoI.js",
+      "_DJDQ8-C8.js",
+      "_fAyqCvjl.js",
+      "_Bu6VdSB7.js",
+      "_BbGlzZQR.js",
+      "_C-CaxYtR.js",
+      "_9tShlU7T.js",
+      "_CZsy3AN3.js",
+      "_C9-a8xMZ.js",
+      "_BO4NN2_1.js"
+    ]
+  },
+  ".svelte-kit/generated/shared/error-template.js": {
+    "file": "_app/immutable/chunks/wbPk3Yxo.js",
+    "name": "error-template",
+    "src": ".svelte-kit/generated/shared/error-template.js",
+    "isDynamicEntry": true
+  },
+  "_-UyI9lYi.js": {
+    "file": "_app/immutable/chunks/-UyI9lYi.js",
+    "name": "index"
+  },
+  "_0eM_fo8n.js": {
+    "file": "_app/immutable/chunks/0eM_fo8n.js",
+    "name": "card-title",
+    "imports": [
+      "_Hp--vKbm.js",
+      "_BnUNuAoI.js",
+      "_Bu6VdSB7.js",
+      "_fAyqCvjl.js"
+    ]
+  },
+  "_9tShlU7T.js": {
+    "file": "_app/immutable/chunks/9tShlU7T.js",
+    "name": "map",
+    "imports": [
+      "_Hp--vKbm.js",
+      "_CZsy3AN3.js",
+      "_BnUNuAoI.js",
+      "_Bu6VdSB7.js",
+      "_fAyqCvjl.js"
+    ]
+  },
+  "_B0XwC4Ot.js": {
+    "file": "_app/immutable/chunks/B0XwC4Ot.js",
+    "name": "utils"
+  },
+  "_B0zqnGNS.js": {
+    "file": "_app/immutable/chunks/B0zqnGNS.js",
+    "name": "this",
+    "imports": [
+      "_BnUNuAoI.js"
+    ]
+  },
+  "_BO4NN2_1.js": {
+    "file": "_app/immutable/chunks/BO4NN2_1.js",
+    "name": "cpu",
+    "imports": [
+      "_Hp--vKbm.js",
+      "_CZsy3AN3.js",
+      "_BnUNuAoI.js",
+      "_Bu6VdSB7.js",
+      "_fAyqCvjl.js"
+    ]
+  },
+  "_BPhkdM9g.js": {
+    "file": "_app/immutable/chunks/BPhkdM9g.js",
+    "name": "prism-tsx",
+    "imports": [
+      "_BnUNuAoI.js",
+      "_Hp--vKbm.js",
+      "_Bu6VdSB7.js",
+      "_fAyqCvjl.js"
+    ]
+  },
+  "_BbGlzZQR.js": {
+    "file": "_app/immutable/chunks/BbGlzZQR.js",
+    "name": "spatialStore.svelte",
+    "imports": [
+      "_BnUNuAoI.js"
+    ]
+  },
+  "_BnUNuAoI.js": {
+    "file": "_app/immutable/chunks/BnUNuAoI.js",
+    "name": "effects"
+  },
+  "_BtbLPWZn.js": {
+    "file": "_app/immutable/chunks/BtbLPWZn.js",
+    "name": "index",
+    "imports": [
+      "_oPhACd5r.js",
+      "_B0XwC4Ot.js"
+    ]
+  },
+  "_Bu6VdSB7.js": {
+    "file": "_app/immutable/chunks/Bu6VdSB7.js",
+    "name": "Icon",
+    "imports": [
+      "_BnUNuAoI.js",
+      "_Hp--vKbm.js",
+      "_fAyqCvjl.js",
+      "_CZsy3AN3.js",
+      "_DJDQ8-C8.js"
+    ]
+  },
+  "_BzzW2Nnb.js": {
+    "file": "_app/immutable/chunks/BzzW2Nnb.js",
+    "name": "svelte-component",
+    "imports": [
+      "_BnUNuAoI.js",
+      "_fAyqCvjl.js"
+    ]
+  },
+  "_C-CaxYtR.js": {
+    "file": "_app/immutable/chunks/C-CaxYtR.js",
+    "name": "card-content",
+    "imports": [
+      "_Hp--vKbm.js",
+      "_BnUNuAoI.js",
+      "_Bu6VdSB7.js",
+      "_fAyqCvjl.js"
+    ]
+  },
+  "_C9-a8xMZ.js": {
+    "file": "_app/immutable/chunks/C9-a8xMZ.js",
+    "name": "layers",
+    "imports": [
+      "_Hp--vKbm.js",
+      "_CZsy3AN3.js",
+      "_BnUNuAoI.js",
+      "_Bu6VdSB7.js",
+      "_fAyqCvjl.js"
+    ]
+  },
+  "_CZsy3AN3.js": {
+    "file": "_app/immutable/chunks/CZsy3AN3.js",
+    "name": "legacy",
+    "imports": [
+      "_BnUNuAoI.js"
+    ]
+  },
+  "_D3T7FWAk.js": {
+    "file": "_app/immutable/chunks/D3T7FWAk.js",
+    "name": "input",
+    "imports": [
+      "_BnUNuAoI.js"
+    ]
+  },
+  "_DJDQ8-C8.js": {
+    "file": "_app/immutable/chunks/DJDQ8-C8.js",
+    "name": "render",
+    "imports": [
+      "_BnUNuAoI.js",
+      "_Hp--vKbm.js"
+    ]
+  },
+  "_Hp--vKbm.js": {
+    "file": "_app/immutable/chunks/Hp--vKbm.js",
+    "name": "disclose-version",
+    "imports": [
+      "_BnUNuAoI.js"
+    ]
+  },
+  "_fAyqCvjl.js": {
+    "file": "_app/immutable/chunks/fAyqCvjl.js",
+    "name": "props",
+    "imports": [
+      "_BnUNuAoI.js"
+    ]
+  },
+  "_oPhACd5r.js": {
+    "file": "_app/immutable/chunks/oPhACd5r.js",
+    "name": "state.svelte",
+    "imports": [
+      "_rT77PjNg.js",
+      "_BnUNuAoI.js",
+      "_B0XwC4Ot.js"
+    ]
+  },
+  "_rT77PjNg.js": {
+    "file": "_app/immutable/chunks/rT77PjNg.js",
+    "name": "index-client",
+    "imports": [
+      "_BnUNuAoI.js"
+    ]
+  },
+  "node_modules/.pnpm/@sveltejs+kit@2.70.3_@svelt_887f7c01e60e7eca78c183cea59776e0/node_modules/@sveltejs/kit/src/runtime/client/entry.js": {
+    "file": "_app/immutable/entry/start.BbeSuJBf.js",
+    "name": "entry/start",
+    "src": "node_modules/.pnpm/@sveltejs+kit@2.70.3_@svelt_887f7c01e60e7eca78c183cea59776e0/node_modules/@sveltejs/kit/src/runtime/client/entry.js",
+    "isEntry": true,
+    "imports": [
+      "_BnUNuAoI.js",
+      "_oPhACd5r.js",
+      "_-UyI9lYi.js",
+      "_B0XwC4Ot.js"
+    ]
+  }
+}

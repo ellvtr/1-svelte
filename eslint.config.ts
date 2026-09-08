@@ -51,6 +51,7 @@ export default tseslint.config(
     },
     rules: {
       "svelte/no-at-html-tags": "warn",
+      "svelte/no-navigation-without-resolve": "off",
     },
   },
 
@@ -68,7 +69,15 @@ export default tseslint.config(
 
   // Ignore build artifacts and caches
   {
-    ignores: ["node_modules/", "dist/", "build/", "out/", ".next/", "coverage/"],
+    ignores: [
+      "node_modules/",
+      "dist/",
+      "build/",
+      "out/",
+      ".next/",
+      "coverage/",
+      ".svelte-kit/",
+    ],
   },
 
   // Turn off formatting rules that conflict with Prettier

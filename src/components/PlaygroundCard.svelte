@@ -1,6 +1,6 @@
 <script lang="ts">
   /**
-   * Interactive Playground Card for Rosetta Stone Demos.
+   * Interactive Playground Card for Rosetta Stone Demos (shadcn-svelte & Tailwind).
    * What: Encapsulates interactive demo widgets alongside toggleable side-by-side Svelte 5 and React/Next.js code viewers with syntax highlighting.
    * When: Invoked per concept card in RunesLivePlayground to render concepts #1 through #10.
    * Why: Enables side-by-side comparative inspection between Svelte 5 signal compilation and React VDOM patterns.
@@ -11,6 +11,10 @@
   import "prismjs/components/prism-typescript";
   import "prismjs/components/prism-jsx";
   import "prismjs/components/prism-tsx";
+  import { Card, CardHeader, CardTitle, CardContent } from "$lib/components/ui/card";
+  import { Badge } from "$lib/components/ui/badge";
+  import { Button } from "$lib/components/ui/button";
+  import { Play, Code2 } from "lucide-svelte";
 
   /**
    * Properties contract for PlaygroundCard.
@@ -48,184 +52,71 @@
   );
 </script>
 
-<div class="demo-card">
-  <div class="card-header">
-    <div class="header-left">
-      <span class="concept-num">#{badgeNum}</span>
-      <span class="rune-tag">{title}</span>
+<Card class="border-slate-800 bg-slate-900/90 shadow-md transition-all hover:border-slate-700">
+  <CardHeader class="p-4 pb-3 border-b border-slate-800/80">
+    <div class="flex items-start justify-between gap-2">
+      <div class="flex items-center gap-2 flex-wrap">
+        <Badge variant="sky" class="font-bold font-mono">#{badgeNum}</Badge>
+        <CardTitle class="text-sm font-mono font-bold text-sky-400">{title}</CardTitle>
+      </div>
+      <span class="text-xs text-slate-400 text-right leading-tight">{subtitle}</span>
     </div>
-    <span class="subtitle">{subtitle}</span>
-  </div>
 
-  <!-- View Switcher -->
-  <div class="card-view-tabs">
-    <button
-      type="button"
-      class="view-tab-btn"
-      class:active={activeView === "demo"}
-      onclick={() => (activeView = "demo")}
-    >
-      ▶ Live Interactive Demo
-    </button>
-    <button
-      type="button"
-      class="view-tab-btn code-tab"
-      class:active={activeView === "svelte"}
-      onclick={() => (activeView = "svelte")}
-    >
-      Svelte 5
-    </button>
-    <button
-      type="button"
-      class="view-tab-btn code-tab"
-      class:active={activeView === "react"}
-      onclick={() => (activeView = "react")}
-    >
-      React / Next.js
-    </button>
-  </div>
+    <!-- View Switcher -->
+    <div class="mt-3 flex rounded-lg bg-slate-950 p-1 border border-slate-800 gap-1">
+      <Button
+        variant={activeView === "demo" ? "default" : "ghost"}
+        size="sm"
+        class="h-7 text-xs flex-1 {activeView === 'demo' ? 'bg-sky-600 hover:bg-sky-700 text-white font-semibold' : 'text-slate-400 hover:text-white'}"
+        onclick={() => (activeView = "demo")}
+      >
+        <Play class="h-3 w-3 mr-1 fill-current" />
+        Live Demo
+      </Button>
 
-  <div class="card-body">
+      <Button
+        variant={activeView === "svelte" ? "default" : "ghost"}
+        size="sm"
+        class="h-7 text-xs flex-1 {activeView === 'svelte' ? 'bg-orange-600 hover:bg-orange-700 text-white font-semibold' : 'text-slate-400 hover:text-white'}"
+        onclick={() => (activeView = "svelte")}
+      >
+        <Code2 class="h-3 w-3 mr-1" />
+        Svelte 5
+      </Button>
+
+      <Button
+        variant={activeView === "react" ? "default" : "ghost"}
+        size="sm"
+        class="h-7 text-xs flex-1 {activeView === 'react' ? 'bg-blue-600 hover:bg-blue-700 text-white font-semibold' : 'text-slate-400 hover:text-white'}"
+        onclick={() => (activeView = "react")}
+      >
+        <Code2 class="h-3 w-3 mr-1" />
+        React 19
+      </Button>
+    </div>
+  </CardHeader>
+
+  <CardContent class="p-4 pt-3 min-h-[120px]">
     {#if activeView === "demo"}
       {@render children()}
     {:else if activeView === "svelte"}
-      <div class="code-view svelte-theme">
-        <div class="code-badge">Svelte 5 Implementation</div>
+      <div class="rounded-md border border-orange-500/30 bg-slate-950 p-3 overflow-x-auto">
+        <div class="text-[11px] font-semibold uppercase tracking-wider text-orange-400 mb-1.5 flex items-center gap-1.5">
+          <span class="h-1.5 w-1.5 rounded-full bg-orange-500"></span>
+          Svelte 5 Implementation
+        </div>
         <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-        <pre><code class="language-tsx">{@html highlightedSvelte}</code></pre>
+        <pre class="m-0 font-mono text-xs leading-relaxed text-slate-200 whitespace-pre-wrap break-words"><code class="language-tsx">{@html highlightedSvelte}</code></pre>
       </div>
     {:else}
-      <div class="code-view react-theme">
-        <div class="code-badge">React / Next.js Implementation</div>
+      <div class="rounded-md border border-sky-500/30 bg-slate-950 p-3 overflow-x-auto">
+        <div class="text-[11px] font-semibold uppercase tracking-wider text-sky-400 mb-1.5 flex items-center gap-1.5">
+          <span class="h-1.5 w-1.5 rounded-full bg-sky-500"></span>
+          React 19 / Next.js Implementation
+        </div>
         <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-        <pre><code class="language-tsx">{@html highlightedReact}</code></pre>
+        <pre class="m-0 font-mono text-xs leading-relaxed text-slate-200 whitespace-pre-wrap break-words"><code class="language-tsx">{@html highlightedReact}</code></pre>
       </div>
     {/if}
-  </div>
-</div>
-
-<style>
-  .demo-card {
-    background: #1e293b;
-    border: 1px solid #334155;
-    border-radius: 10px;
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    border-bottom: 1px solid #334155;
-    padding-bottom: 10px;
-    gap: 8px;
-  }
-
-  .header-left {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .concept-num {
-    background: #0284c7;
-    color: #f8fafc;
-    font-size: 0.75rem;
-    font-weight: 700;
-    padding: 2px 7px;
-    border-radius: 4px;
-  }
-
-  .rune-tag {
-    color: #38bdf8;
-    font-family: monospace;
-    font-weight: 700;
-    font-size: 0.95rem;
-  }
-
-  .subtitle {
-    color: #94a3b8;
-    font-size: 0.75rem;
-    text-align: right;
-  }
-
-  .card-view-tabs {
-    display: flex;
-    gap: 4px;
-    background: #0f172a;
-    padding: 3px;
-    border-radius: 6px;
-    border: 1px solid #1e293b;
-  }
-
-  .view-tab-btn {
-    flex: 1;
-    background: transparent;
-    border: none;
-    color: #94a3b8;
-    padding: 5px 8px;
-    font-size: 0.75rem;
-    font-weight: 500;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    text-align: center;
-  }
-
-  .view-tab-btn:hover {
-    color: #f8fafc;
-    background: #1e293b;
-  }
-
-  .view-tab-btn.active {
-    background: #0284c7;
-    color: #f8fafc;
-    font-weight: 600;
-  }
-
-  .card-body {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    min-height: 110px;
-  }
-
-  .code-view {
-    background: #0f172a;
-    border: 1px solid #334155;
-    border-radius: 6px;
-    padding: 10px;
-    overflow-x: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .code-badge {
-    font-size: 0.7rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  .svelte-theme .code-badge {
-    color: #ff3e00;
-  }
-
-  .react-theme .code-badge {
-    color: #00d8ff;
-  }
-
-  pre {
-    margin: 0;
-    font-family: monospace;
-    font-size: 0.75rem;
-    line-height: 1.4;
-    color: #e2e8f0;
-    white-space: pre-wrap;
-    word-break: break-word;
-  }
-</style>
+  </CardContent>
+</Card>
